@@ -13,7 +13,7 @@ plt.rcParams["keymap.save"].remove("s")
 _N = 10
 
 group_manager = GroupManager({}, _N)
-tui = TUI(group_manager, False)
+tui = TUI(group_manager, True)
 initial_conditions = np.array(
     [
         [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],

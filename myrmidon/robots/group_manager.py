@@ -57,6 +57,8 @@ class GroupManager:
     # @update_laplacian
     def create(self):
         """_summary_"""
+        if not self.garage.agents:
+            return
 
         def generate_id():
             ndx = -1
@@ -85,8 +87,8 @@ class GroupManager:
         group = self.groups[group_id]
         while group.agents:
             self.remove_from_group(group_id=group_id)
-
-        del self.groups[group_id]
+        if group_id in self.groups:
+            del self.groups[group_id]
 
     @update_laplacian
     def combine(self, main_group_id, other_group_id):
@@ -181,11 +183,13 @@ class GroupManager:
         return dxu
 
     def closest_leader_to_point(self, agent_positions, pt):
+        # TODO: Return group_id not leader
         leader_positions = agent_positions[:2, self.leaders]
         dists = np.linalg.norm(leader_positions - pt, axis=0)
         closest_leader_ndx = np.argmin(dists)
         closest_leader = self.leaders[closest_leader_ndx]
-        return closest_leader
+        group_id = None
+        return group_id
 
     @property
     def leaders(self):

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="myrmidon",
-    version="0.1",
+    version="1.0",
     description="A python package to remote control ground-based agents",
     author="Atharv Marathe",
     author_email="amarathe9@gatech.edu",

@@ -5,6 +5,7 @@ import math
 
 def chunks(seq, num_chunks):
     chunk_size = int(math.ceil(len(seq) / num_chunks))
+    # TODO: Look into floor and then modulo to add on the remainder
     for i in range(num_chunks):
         yield seq[i * chunk_size : (i + 1) * chunk_size]
 

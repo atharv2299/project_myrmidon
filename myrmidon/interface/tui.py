@@ -89,6 +89,8 @@ class TUI:
                         self.group_ids[0],
                         self.group_ids[-1],
                     )
+            elif pressed_key.char == "y":
+                self.group_manager.disband(self.controlled_group_id)
 
             # TODO: Check this
             # Find the next possible controllable group if the current group has been invalidated.

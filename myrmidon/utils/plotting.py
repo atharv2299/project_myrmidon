@@ -44,6 +44,9 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
     if not group_manager.groups:
         for leader_label in leader_labels:
             leader_label.set_alpha(0)
+        # TODO: Bug in plotting when disbanding group 1
+        for line in line_follower:
+            line[0].set_alpha(0)
         return leader_labels, line_follower
     leaders = group_manager.leaders
     rows, cols = utils.find_connections(group_manager.block_L)

@@ -17,9 +17,9 @@ class Group:
     def __init__(self, name, agents=None):
         self.agents = agents or []
         self.name = name
-        self._L = None
         self.control_gain = 0.4
         self.dist_scale = 0.35
+        self._L = None
         self.dists = None
         self._needs_laplacian_update = False
 
@@ -38,6 +38,9 @@ class Group:
     @update_laplacian
     def clear(self):
         self.agents.clear()
+
+    def set_dist_scale(self, new_dist_scale):
+        self.dist_scale = new_dist_scale
 
     def calculate_follower_dxus(self, positions, leader_dxu, si_to_uni_dyn):
         """BARRIERLESS DXU
@@ -75,12 +78,13 @@ class Group:
                 )
                 dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], positions[:, [agent_id]])
         # TODO: Scale leader dxu based on distance to connected followers
-        print(leader_dxu)
+        # leader_follower_ndx = np.array(list(set(utils.misc.find_connections(-L)[0])))
+        # leader_followers = self.agents[leader_follower_ndx]
+        # leader_follower_positions = positions[:2, leader_followers]
+        # # print(positions)
+        # print(leader_follower_positions)
         dxu[self.agents[0]] = leader_dxu
         return dxu
-
-    def set_dist_scale(self, new_dist_scale):
-        self.dist_scale = new_dist_scale
 
     @property
     def L(self):
