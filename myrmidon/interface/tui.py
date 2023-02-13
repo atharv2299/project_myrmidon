@@ -3,14 +3,14 @@ from pynput import keyboard
 
 
 class TUI:
-    def __init__(self, group_manager) -> None:
-        # TODO: Make a private controlled group index, and make controlled group an actual group
+    def __init__(self, group_manager, allow_multi_leader_movement=False) -> None:
         self.v = 0
         self.w = 0
         self.group_manager = group_manager
         self._controlled_group_ndx = 0
         self.leader_dxu = {}
         self.exit = False
+        self.allow_multi_leader_movement = allow_multi_leader_movement
 
     def on_press(self, key):
         self.key_function(key)
@@ -82,21 +82,38 @@ class TUI:
 
             elif pressed_key.char == "t":
                 if len(self.group_manager.groups) >= 2:
-                    if self._controlled_group_ndx == self.group_ids[-1]:
-                        self._controlled_group_ndx = self.group_ids[0]
+                    # if self._controlled_group_ndx == self.group_ids[-1]:
+                    #     self._controlled_group_ndx = self.group_ids[0]
 
                     self.group_manager.combine(
                         self.group_ids[0],
                         self.group_ids[-1],
                     )
 
+            # TODO: Check this
+            # Find the next possible controllable group if the current group has been invalidated.
+            if len(self.group_ids):
+                while self.controlled_group is None:
+                    self.next_controlled_group()
+
             if not self.group_manager.groups:
                 return
-            self.leader_dxu = {
-                self.controlled_group_id: np.tile(
-                    np.array([[self.v], [self.w]]), (1, 1)
+            # Be able to move multiple leaders at once:
+            if self.allow_multi_leader_movement:
+                self.leader_dxu.update(
+                    {
+                        self.controlled_group_id: np.tile(
+                            np.array([[self.v], [self.w]]), (1, 1)
+                        )
+                    }
                 )
-            }
+            # Can only move single leader:
+            else:
+                self.leader_dxu = {
+                    self.controlled_group_id: np.tile(
+                        np.array([[self.v], [self.w]]), (1, 1)
+                    )
+                }
 
         except AttributeError:
             if pressed_key == keyboard.Key.space:
@@ -119,6 +136,8 @@ class TUI:
         self._controlled_group_ndx = (self._controlled_group_ndx + 1) % (
             len(self.group_ids)
         )
+        self.v = 0
+        self.w = 0
 
     @property
     def group_ids(self):

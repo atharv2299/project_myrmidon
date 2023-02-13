@@ -49,17 +49,30 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
     rows, cols = utils.find_connections(group_manager.block_L)
     num_bots = group_manager.num_agents
 
-    for i in range(len(line_follower)):
-        line_follower[i][0].set_alpha(0)
+    # for i in range(len(line_follower)):
+    #     line_follower[i][0].set_alpha(0)
+
+    for line in line_follower:
+        line[0].set_alpha(0)
 
     # TODO: Highlight controlled formation - get from UI
-    for i in range(len(leader_labels)):
-        if i == controlled_group.agents[0]:
-            leader_labels[i].set_alpha(1)
-            # leader_labels[i].set_position([x[0, i], x[1, i] + 0.15])
-            leader_labels[i].set_offsets(x[:2, i].T)
+    # for i in range(len(leader_labels)):
+    #     if i == controlled_group.agents[0]:
+    #         leader_labels[i].set_alpha(1)
+    #         leader_labels[i].set_offsets(x[:2, i].T)
+    #     else:
+    #         leader_labels[i].set_alpha(0)
+
+    for ndx, leader_label in enumerate(leader_labels):
+        if ndx in group_manager.leaders:
+            leader_label.set_alpha(1)
+            leader_label.set_offsets(x[:2, ndx].T)
+            if ndx == controlled_group.agents[0]:
+                leader_label.set_edgecolor("lime")
+            else:
+                leader_label.set_edgecolor("red")
         else:
-            leader_labels[i].set_alpha(0)
+            leader_label.set_alpha(0)
 
     for i, j in zip(rows, cols):
 
@@ -84,13 +97,13 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
 
 COLORS = [
     "orange",
-    "royalblue",
-    "green",
-    "darkslateblue",
-    "purple",
-    "black",
-    "lime",
     "skyblue",
+    "royalblue",
+    "purple",
+    "green",
+    "black",
+    "darkslateblue",
+    "cyan",
     "fuchsia",
     "gold",
     "white",

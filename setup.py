@@ -7,5 +7,5 @@ setup(
     author="Atharv Marathe",
     author_email="amarathe9@gatech.edu",
     packages=["myrmidon"],
-    install_requires=["numpy", "pynput", "matplotlib", "cvxopt"],
+    install_requires=["numpy", "pynput", "matplotlib", "robotarium-python-simulator"],
 )

@@ -74,6 +74,8 @@ class Group:
                     * (positions[:2, [neighbor]] - positions[:2, [agent_id]])
                 )
                 dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], positions[:, [agent_id]])
+        # TODO: Scale leader dxu based on distance to connected followers
+        print(leader_dxu)
         dxu[self.agents[0]] = leader_dxu
         return dxu
 
