@@ -31,7 +31,10 @@ class Group:
         return self.agents.pop()
 
     def update_group_laplacian(self):
-        self.L, self.dists = utils.graph.rigid_cycle_GL(len(self.agents))
+        if not self.agents:
+            self.L = self.dists = None
+        else:
+            self.L, self.dists = utils.graph.rigid_cycle_GL(len(self.agents))
 
     def calculate_follower_dxus(self, positions, leader_dxu, si_to_uni_dyn):
         """BARRIERLESS DXU

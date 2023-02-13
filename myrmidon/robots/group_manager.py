@@ -1,7 +1,9 @@
 import copy
-from myrmidon.robots.group import Group
-from myrmidon import utils
+
 import numpy as np
+
+from myrmidon import utils
+from myrmidon.robots.group import Group
 
 
 def update_laplacian(func):
@@ -132,12 +134,17 @@ class GroupManager:
             group (_type_): _description_
         """
         self.garage.add(self.groups[group_id].remove())
+        if not self.groups[group_id].agents:
+            self.disband(group_id)
         # TODO: Reducing to 0 fails!
 
     def update_block_laplacian(self):
         """_summary_"""
         garage = np.zeros((len(self.garage.agents), len(self.garage.agents)))
         group_list = list(self.groups.values())
+        if not group_list:
+            self.block_L = garage
+            return
         L = group_list[0].L
         agent_ids = copy.copy(group_list[0].agents)
         for group in group_list[1:]:
@@ -164,7 +171,7 @@ class GroupManager:
         full_list = list(agent_ids) + list(self.garage.agents)
         full_list = np.argsort(full_list)
         L = -L[full_list, :][:, full_list]
-        return L
+        self.block_L = L
 
     def get_dxu(
         self,
@@ -203,10 +210,6 @@ class GroupManager:
 
         dxu = uni_barrier_certs(dxu, agent_positions)
         return dxu
-
-    def get_block_L(self):
-        """_summary_"""
-        return self.block_L
 
     @property
     def leaders(self):

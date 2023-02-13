@@ -1,11 +1,15 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import rps.robotarium as robotarium
+from pynput import keyboard
 from rps.utilities.barrier_certificates import *
 from rps.utilities.controllers import *
-from pynput import keyboard
-import numpy as np
+
+from myrmidon import utils
 from myrmidon.interface import TUI
 from myrmidon.robots import GroupManager
 
+plt.rcParams["keymap.save"].remove("s")
 _N = 10
 
 group_manager = GroupManager({}, _N)
@@ -44,9 +48,12 @@ r = robotarium.Robotarium(
 x = r.get_poses()
 r.step()
 
+leader_labels, line_follower = utils.plotting.initialize_plot(
+    r, x, group_manager.num_agents
+)
+
 
 listener = keyboard.Listener(on_press=tui.on_press, suppress=False)
-print("listener_started")
 listener.start()
 
 while True:
@@ -60,4 +67,13 @@ while True:
     )
     r.set_velocities(np.arange(_N), dxu)
     x = r.get_poses()
+
+    leader_labels, line_follower = utils.plotting.update_plot(
+        group_manager,
+        line_follower,
+        leader_labels,
+        x,
+        tui.controlled_group,
+    )
+
     r.step()
