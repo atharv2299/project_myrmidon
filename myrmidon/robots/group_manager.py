@@ -41,33 +41,35 @@ class GroupManager:
         "jaguar",
     ]
 
-    def __init__(self, groups, garage):
+    def __init__(self, groups, num_agents):
         """
         Args:
             groups (dict[int, Group]): _description_
             garage (Group): _description_
         """
         self.groups = groups
-        self.garage = garage
+        self.garage = Group("Garage", list(range(num_agents)))
         self.block_L = None
 
-    @update_laplacian
+    # @update_laplacian
     def create(self):
         """_summary_"""
 
         def generate_id():
+            ndx = -1
             for key, ndx in zip(list(self.groups.keys()), range(len(self.groups))):
                 if key != ndx:
                     return ndx
             return ndx + 1
 
         new_group_id = generate_id()
+
         new_group = Group(
             name=GroupManager.ADJECTIVES[new_group_id // 10]
             + " "
             + GroupManager.NOUNS[new_group_id % 10],
         )
-        self.groups.append(new_group)
+        self.groups[new_group_id] = new_group
         return new_group_id
 
     @update_laplacian
@@ -107,8 +109,9 @@ class GroupManager:
         group = self.groups[group_id]
         chunks = list(utils.chunks(group.agents, num_groups))
         for agents in chunks[1:]:
-            new_group_id = self.create()
-            self.groups[new_group_id].agents.extend(agents)
+            if agents:
+                new_group_id = self.create()
+                self.groups[new_group_id].agents.extend(agents)
         group.agents = chunks[0]
 
     @update_laplacian
@@ -129,6 +132,7 @@ class GroupManager:
             group (_type_): _description_
         """
         self.garage.add(self.groups[group_id].remove())
+        # TODO: Reducing to 0 fails!
 
     def update_block_laplacian(self):
         """_summary_"""
@@ -162,9 +166,43 @@ class GroupManager:
         L = -L[full_list, :][:, full_list]
         return L
 
-    def get_dxu(self):
+    def get_dxu(
+        self,
+        leader_dxus,
+        garage_locs,
+        agent_positions,
+        garage_controller,
+        si_to_uni_dyn,
+        uni_barrier_certs,
+    ):
         """_summary_"""
+
+        def garage_dxu():
+            dxu_dict = {}
+            for agent in self.garage.agents:
+                dxu_dict[agent] = garage_controller(
+                    agent_positions[:, [agent]],
+                    garage_locs[:, [agent]],
+                )
+            return dxu_dict
+
         # TODO: Groups return dict, sort it, put it together
+        dxu_dict = {}
+        dxu_dict.update(garage_dxu())
+        for group_id, group in self.groups.items():
+            leader_dxu = leader_dxus.get(group_id, np.array([[0], [0]]))
+            dxu_dict.update(
+                group.calculate_follower_dxus(
+                    agent_positions, leader_dxu, si_to_uni_dyn
+                )
+            )
+
+        dxu = np.zeros((2, self.num_agents))
+        for agent_id in sorted(dxu_dict):
+            dxu[:, [agent_id]] = dxu_dict[agent_id]
+
+        dxu = uni_barrier_certs(dxu, agent_positions)
+        return dxu
 
     def get_block_L(self):
         """_summary_"""
@@ -173,3 +211,9 @@ class GroupManager:
     @property
     def leaders(self):
         return np.array([group.agents[0] for group in self.groups.values()])
+
+    @property
+    def num_agents(self):
+        return sum([len(group.agents) for group in self.groups.values()]) + len(
+            self.garage.agents
+        )

@@ -14,8 +14,8 @@ def update_laplacian(func):
 
 
 class Group:
-    def __init__(self, name):
-        self.agents = []
+    def __init__(self, name, agents=None):
+        self.agents = agents or []
         self.name = name
         self.L = None
         self.control_gain = 0.4
@@ -44,29 +44,29 @@ class Group:
         Returns:
             dict[np.ndarray[double]]: N barrierless 2x1 unicycle dynamic control for agents in this formation, including the leader
         """
+        if not self.agents:
+            return {}
         dxs = np.zeros((2, len(self.agents)))
         dxu = {}
-        for agent in self.agents:
+        for ndx, agent_id in enumerate(self.agents):
             L = self.L.copy()
-            neighbors = utils.graph.topological_neighbors(L, agent)
-
-            for neighbor in neighbors:
-
-                dxs[:, [agent]] += (
+            neighbors = utils.graph.topological_neighbors(L, ndx)
+            for neighbor_ndx in neighbors:
+                neighbor = self.agents[neighbor_ndx]
+                dxs[:, [ndx]] += (
                     self.control_gain
                     * (
                         np.power(
                             np.linalg.norm(
-                                positions[:2, [neighbor]] - positions[:2, [agent]]
+                                positions[:2, [neighbor]] - positions[:2, [agent_id]]
                             ),
                             2,
                         )
-                        - np.power(self.dist_scale * self.dists[agent, neighbor], 2)
+                        - np.power(self.dist_scale * self.dists[ndx, neighbor_ndx], 2)
                     )
-                    * (positions[:2, [neighbor]] - positions[:2, [agent]])
+                    * (positions[:2, [neighbor]] - positions[:2, [agent_id]])
                 )
-                dxu[agent] = si_to_uni_dyn(dxs[:, [agent]], positions[:, [agent]])
-
+                dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], positions[:, [agent_id]])
         dxu[self.agents[0]] = leader_dxu
         return dxu
 

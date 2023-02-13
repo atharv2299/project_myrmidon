@@ -1,5 +1,6 @@
 from rps.utilities.misc import determine_marker_size
-from remote_control.utils import *
+from myrmidon import utils
+import numpy as np
 
 
 def initialize_plot(L, r, x):
@@ -32,7 +33,7 @@ def initialize_plot(L, r, x):
             facecolors="none",
             marker="o",
             zorder=0,
-            alpha=0,
+            alpha=1,
             linewidths=2,
         )
         for kk in range(0, 11)
@@ -40,21 +41,22 @@ def initialize_plot(L, r, x):
     return leader_labels, line_follower
 
 
-def update_plot(robot_groups, line_follower, leader_labels, x, L):
+def update_plot(robot_groups, line_follower, leader_labels, x):
     leaders = robot_groups.leaders
-    rows, cols = find_connections(L)
-    num_bots = L.shape[0]
+    rows, cols = utils.find_connections(robot_groups.block_L)
+    num_bots = robot_groups.num_agents
 
     for i in range(len(line_follower)):
         line_follower[i][0].set_alpha(0)
 
+    # TODO: Highlight controlled formation - get from UI
     for i in range(len(leader_labels)):
-        if i == robot_groups.get_controlled_formation()[0]:
-            leader_labels[i].set_alpha(1)
-            # leader_labels[i].set_position([x[0, i], x[1, i] + 0.15])
-            leader_labels[i].set_offsets(x[:2, i].T)
-        else:
-            leader_labels[i].set_alpha(0)
+        #     if i == robot_groups.get_controlled_formation()[0]:
+        #         leader_labels[i].set_alpha(1)
+        #         # leader_labels[i].set_position([x[0, i], x[1, i] + 0.15])
+        leader_labels[i].set_offsets(x[:2, i].T)
+    #     else:
+    #         leader_labels[i].set_alpha(0)
 
     for i, j in zip(rows, cols):
 
@@ -64,7 +66,7 @@ def update_plot(robot_groups, line_follower, leader_labels, x, L):
                 [x[1, i], x[1, j]],
             )
             line_follower[i][0].set_alpha(1)
-            line_follower[i][0].set_color(get_color(j, robot_groups.formations))
+            line_follower[i][0].set_color(get_color(j, robot_groups))
         else:
             line_follower[i * (num_bots - 1) + j][0].set_data(
                 [x[0, i], x[0, j]],
@@ -72,7 +74,7 @@ def update_plot(robot_groups, line_follower, leader_labels, x, L):
             )
             line_follower[i * (num_bots - 1) + j][0].set_alpha(1)
             line_follower[i * (num_bots - 1) + j][0].set_color(
-                get_color(j, robot_groups.formations)
+                get_color(j, robot_groups)
             )
     return leader_labels, line_follower
 
