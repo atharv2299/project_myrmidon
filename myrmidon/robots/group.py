@@ -7,7 +7,7 @@ from myrmidon import utils
 def update_laplacian(func):
     def wrapper(self, *args, **kwargs):
         ret = func(self, *args, **kwargs)
-        self.update_group_laplacian()
+        self._needs_laplacian_update = True
         return ret
 
     return wrapper
@@ -17,24 +17,27 @@ class Group:
     def __init__(self, name, agents=None):
         self.agents = agents or []
         self.name = name
-        self.L = None
+        self._L = None
         self.control_gain = 0.4
         self.dist_scale = 0.35
         self.dists = None
+        self._needs_laplacian_update = False
 
     @update_laplacian
     def add(self, agent_id):
         self.agents.append(agent_id)
 
     @update_laplacian
+    def extend(self, agent_ids):
+        self.agents.extend(agent_ids)
+
+    @update_laplacian
     def remove(self):
         return self.agents.pop()
 
-    def update_group_laplacian(self):
-        if not self.agents:
-            self.L = self.dists = None
-        else:
-            self.L, self.dists = utils.graph.rigid_cycle_GL(len(self.agents))
+    @update_laplacian
+    def clear(self):
+        self.agents.clear()
 
     def calculate_follower_dxus(self, positions, leader_dxu, si_to_uni_dyn):
         """BARRIERLESS DXU
@@ -49,6 +52,7 @@ class Group:
         """
         if not self.agents:
             return {}
+
         dxs = np.zeros((2, len(self.agents)))
         dxu = {}
         for ndx, agent_id in enumerate(self.agents):
@@ -75,3 +79,13 @@ class Group:
 
     def set_dist_scale(self, new_dist_scale):
         self.dist_scale = new_dist_scale
+
+    @property
+    def L(self):
+        if self._needs_laplacian_update:
+            if not self.agents:
+                self._L = self.dists = None
+            else:
+                self._L, self.dists = utils.graph.rigid_cycle_GL(len(self.agents))
+            self._needs_laplacian_update = False
+        return self._L

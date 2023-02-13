@@ -56,7 +56,7 @@ leader_labels, line_follower = utils.plotting.initialize_plot(
 listener = keyboard.Listener(on_press=tui.on_press, suppress=False)
 listener.start()
 
-while True:
+while not tui.exit:
     dxu = group_manager.get_dxu(
         tui.leader_dxu,
         _garage,
@@ -65,7 +65,9 @@ while True:
         si_to_uni_dyn,
         uni_barrier_certs,
     )
+
     r.set_velocities(np.arange(_N), dxu)
+
     x = r.get_poses()
 
     leader_labels, line_follower = utils.plotting.update_plot(
@@ -77,3 +79,5 @@ while True:
     )
 
     r.step()
+
+r.call_at_scripts_end()

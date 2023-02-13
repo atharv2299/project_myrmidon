@@ -10,6 +10,7 @@ class TUI:
         self.group_manager = group_manager
         self._controlled_group_ndx = 0
         self.leader_dxu = {}
+        self.exit = False
 
     def on_press(self, key):
         self.key_function(key)
@@ -81,6 +82,9 @@ class TUI:
 
             elif pressed_key.char == "t":
                 if len(self.group_manager.groups) >= 2:
+                    if self._controlled_group_ndx == self.group_ids[-1]:
+                        self._controlled_group_ndx = self.group_ids[0]
+
                     self.group_manager.combine(
                         self.group_ids[0],
                         self.group_ids[-1],
@@ -103,6 +107,8 @@ class TUI:
                 print(
                     f"=========================================\nControlling formation: {self.controlled_group_id}\nFormations: {self.group_manager.groups}\n ========================================="
                 )
+            elif pressed_key == keyboard.Key.esc:
+                self.exit = True
         if is_bot_count_updated:
             print(
                 f"========================================= \nThere are now {len(self.controlled_group.agents)} robot(s) in formation #{self.controlled_group} \nwhich are mantaining a distance of {self.controlled_group.dist_scale:.2f}\n========================================="

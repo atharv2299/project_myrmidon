@@ -9,7 +9,7 @@ from myrmidon.robots.group import Group
 def update_laplacian(func):
     def wrapper(self, *args, **kwargs):
         ret = func(self, *args, **kwargs)
-        self.update_block_laplacian()
+        self._needs_laplacian_update = True
         return ret
 
     return wrapper
@@ -51,7 +51,8 @@ class GroupManager:
         """
         self.groups = groups
         self.garage = Group("Garage", list(range(num_agents)))
-        self.block_L = None
+        self._block_L = None
+        self._needs_laplacian_update = False
 
     # @update_laplacian
     def create(self):
@@ -95,9 +96,11 @@ class GroupManager:
             main_group (_type_): _description_
             other_group (_type_): _description_
         """
+        if main_group_id == other_group_id:
+            return
         other_group = self.groups[other_group_id]
-        self.groups[main_group_id].agents.extend(other_group.agents)
-        other_group.agents.clear()
+        self.groups[main_group_id].extend(other_group.agents)
+        other_group.clear()
         self.disband(other_group_id)
 
     @update_laplacian
@@ -113,8 +116,9 @@ class GroupManager:
         for agents in chunks[1:]:
             if agents:
                 new_group_id = self.create()
-                self.groups[new_group_id].agents.extend(agents)
-        group.agents = chunks[0]
+                self.groups[new_group_id].extend(agents)
+        group.clear()
+        group.extend(chunks[0])
 
     @update_laplacian
     def add_to_group(self, group_id):
@@ -124,6 +128,8 @@ class GroupManager:
             group (_type_): _description_
             agent (_type_): _description_
         """
+        if not self.garage.agents:
+            return
         self.groups[group_id].add(self.garage.remove())
 
     @update_laplacian
@@ -136,42 +142,6 @@ class GroupManager:
         self.garage.add(self.groups[group_id].remove())
         if not self.groups[group_id].agents:
             self.disband(group_id)
-        # TODO: Reducing to 0 fails!
-
-    def update_block_laplacian(self):
-        """_summary_"""
-        garage = np.zeros((len(self.garage.agents), len(self.garage.agents)))
-        group_list = list(self.groups.values())
-        if not group_list:
-            self.block_L = garage
-            return
-        L = group_list[0].L
-        agent_ids = copy.copy(group_list[0].agents)
-        for group in group_list[1:]:
-            formation_L = group.L
-            agent_ids.extend(group.agents)
-            L = np.block(
-                [
-                    [L, np.zeros((L.shape[0], formation_L.shape[1]))],
-                    [
-                        np.zeros((formation_L.shape[0], L.shape[1])),
-                        formation_L,
-                    ],
-                ]
-            )
-        L = np.block(
-            [
-                [L, np.zeros((L.shape[0], garage.shape[1]))],
-                [
-                    np.zeros((garage.shape[0], L.shape[1])),
-                    garage,
-                ],
-            ]
-        )
-        full_list = list(agent_ids) + list(self.garage.agents)
-        full_list = np.argsort(full_list)
-        L = -L[full_list, :][:, full_list]
-        self.block_L = L
 
     def get_dxu(
         self,
@@ -193,7 +163,6 @@ class GroupManager:
                 )
             return dxu_dict
 
-        # TODO: Groups return dict, sort it, put it together
         dxu_dict = {}
         dxu_dict.update(garage_dxu())
         for group_id, group in self.groups.items():
@@ -220,3 +189,45 @@ class GroupManager:
         return sum([len(group.agents) for group in self.groups.values()]) + len(
             self.garage.agents
         )
+
+    @property
+    def block_L(self):
+        def update_block_laplacian():
+            """_summary_"""
+            garage = np.zeros((len(self.garage.agents), len(self.garage.agents)))
+            group_list = list(self.groups.values())
+            if not group_list:
+                self._block_L = garage
+                return
+            L = group_list[0].L
+            agent_ids = copy.copy(group_list[0].agents)
+            for group in group_list[1:]:
+                agent_ids.extend(group.agents)
+                L = np.block(
+                    [
+                        [L, np.zeros((L.shape[0], group.L.shape[1]))],
+                        [
+                            np.zeros((group.L.shape[0], L.shape[1])),
+                            group.L,
+                        ],
+                    ]
+                )
+            L = np.block(
+                [
+                    [L, np.zeros((L.shape[0], garage.shape[1]))],
+                    [
+                        np.zeros((garage.shape[0], L.shape[1])),
+                        garage,
+                    ],
+                ]
+            )
+            full_list = list(agent_ids) + list(self.garage.agents)
+            full_list = np.argsort(full_list)
+            L = -L[full_list, :][:, full_list]
+            self._block_L = L
+
+        if self._needs_laplacian_update:
+            update_block_laplacian()
+            self._needs_laplacian_update = False
+
+        return self._block_L

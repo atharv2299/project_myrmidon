@@ -1,8 +1,10 @@
 import numpy as np
+import time
+import math
 
 
 def chunks(seq, num_chunks):
-    chunk_size = len(seq) // num_chunks
+    chunk_size = int(math.ceil(len(seq) / num_chunks))
     for i in range(num_chunks):
         yield seq[i * chunk_size : (i + 1) * chunk_size]
 
@@ -24,3 +26,14 @@ def unique_list(lst):
         seen.add(elem)
 
     return ret
+
+
+def time_func(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        ret = func(*args, **kwargs)
+        stop = time.time()
+        print(f"{func.__name__}: {stop-start} seconds")
+        return ret
+
+    return wrapper
