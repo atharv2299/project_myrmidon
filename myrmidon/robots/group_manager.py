@@ -63,6 +63,10 @@ class GroupManager:
     #     self.selected_groups.append(group_id)
     #     self.selected_groups = np.unique(self.selected_groups)
     #     return self.selected_groups
+
+    # def clear_select(self):
+    #     self.selected_groups = np.array()
+
     # @update_laplacian
     def create(self):
         """_summary_"""
@@ -153,9 +157,6 @@ class GroupManager:
         self.garage.add(self.groups[group_id].remove())
         if not self.groups[group_id].agents:
             self.disband(group_id)
-
-    def clear_select(self):
-        self.selected_groups = np.array()
 
     def get_dxu(
         self,

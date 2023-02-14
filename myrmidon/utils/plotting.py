@@ -40,7 +40,14 @@ def initialize_plot(r, x, num_agents):
     return leader_labels, line_follower
 
 
-def update_plot(group_manager, line_follower, leader_labels, x, controlled_group):
+def update_plot(
+    group_manager,
+    line_follower,
+    leader_labels,
+    x,
+    tui_controlled_group,
+    gui_controlled_group,
+):
     # TODO: Update plotting for GUI and TUI
     if not group_manager.groups:
         for leader_label in leader_labels:
@@ -60,7 +67,7 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
 
     # TODO: Highlight controlled formation - get from UI
     # for i in range(len(leader_labels)):
-    #     if i == controlled_group.agents[0]:
+    #     if i == tui_controlled_group.agents[0]:
     #         leader_labels[i].set_alpha(1)
     #         leader_labels[i].set_offsets(x[:2, i].T)
     #     else:
@@ -70,10 +77,17 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
         if ndx in group_manager.leaders:
             leader_label.set_alpha(1)
             leader_label.set_offsets(x[:2, ndx].T)
-            if ndx == controlled_group.agents[0]:
-                leader_label.set_edgecolor("lime")
+            # print(ndx)
+            # print(tui_controlled_group.agents[0])
+            # print(gui_controlled_group.agents[0])
+            if ndx == tui_controlled_group.agents[0]:
+                leader_label.set_edgecolor("cyan")
             else:
                 leader_label.set_edgecolor("red")
+            if ndx == gui_controlled_group.agents[0]:
+                leader_label.set_facecolor("black")
+            else:
+                leader_label.set_facecolor("none")
         else:
             leader_label.set_alpha(0)
 

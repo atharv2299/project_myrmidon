@@ -80,6 +80,7 @@ while not tui.exit:
         leader_labels,
         x,
         tui.controlled_group,
+        gui.controlled_group,
     )
 
     r.step()

@@ -23,7 +23,7 @@ class GUI:
         self._controlled_group_ndx = 0
         self.agent_positions = agent_positions
 
-        # TODO: Need way to access self.selected_groups from
+        # TODO: Need way to access self.selected_groups from group_manager
         # The GUI is going to track selected groups, group_manager will not know what groups a person has selected, the gui will tell it what to do and with what group
 
         # Iniitialize for Robotarium
@@ -45,11 +45,11 @@ class GUI:
         ).place(x=900, y=30)
 
         button_newleader = Button(
-            self.root, text="New Leader", command=self.button_join, state=NORMAL
+            self.root, text="New Leader", command=self.button_newleader, state=NORMAL
         ).place(x=800, y=120)
 
         button_join = Button(
-            self.root, text="Join", command=self.button_join, state=NORMAL
+            self.root, text="Join", command=self.next_controlled_group, state=NORMAL
         ).place(x=1000, y=120)
 
         button_disband = Button(
@@ -79,7 +79,7 @@ class GUI:
         # ).place(x=910, y=390)
 
         button_go_to_point = Button(
-            self.root, text="Go To Point", command=self.debugging_func
+            self.root, text="Go To Point", command=self.onclick
         ).place(x=800, y=480)
 
     # Define button functions
@@ -90,34 +90,40 @@ class GUI:
         #     main_group_id=selected_groups[-2],
         #     other_group_id=selected_groups[-1]
         # )
-        group_manager.clear_select()
+        # self.group_manager.clear_select()
 
     def button_separate(self):
         print("Separate function plz")
-        # group_manager.split(
+        # self.group_manager.split(
         #     group_id=selected_groups[-1],
         #     num_groups=2
         # )
-        group_manager.clear_select()
+        # self.group_manager.clear_select()
 
     def button_newleader(self):
         print("New Leader function plz")
-        group_manager.create()
+        group_id = self.group_manager.create()
+        self.group_manager.add_to_group(group_id)
 
     def button_disband(self):
         print("Disband function plz")
-        group_manager.disband(group_id=selected_groups[-1])
-        group_manager.clear_select()
+        self.group_manager.disband(group_id=self.controlled_group_id)
+        # self.group_manager.clear_select()
 
     def add_robot(self):
         print("Add Robot")
-        group_manager.add_to_group(group_id=selected_groups[-1])
-        group_manager.clear_select()
+        self.group_manager.add_to_group(group_id=self.controlled_group_id)
+        # self.group_manager.clear_select()
 
     def remove_robot(self):
         print("Remove Robot")
-        group_manager.remove_from_group(group_id=selected_groups[-1])
-        group_manager.clear_select()
+        self.group_manager.remove_from_group(group_id=self.controlled_group_id)
+        # self.group_manager.clear_select()
+
+    def next_controlled_group(self):
+        self._controlled_group_ndx = (self._controlled_group_ndx + 1) % (
+            len(self.group_ids)
+        )
 
     def onclick(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
