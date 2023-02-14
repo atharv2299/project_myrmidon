@@ -155,7 +155,9 @@ class GUI:
             print(pos)
             if self.group_manager.leaders.size > 0:
                 self._controlled_group_ndx = self.group_manager.closest_leader_to_point(
-                    agent_positions=self.agent_positions, pt=pos
+                    agent_positions=self.agent_positions,
+                    pt=pos,
+                    ndx=self._controlled_group_ndx,
                 )
             # self.leader_selection_flag = False
 

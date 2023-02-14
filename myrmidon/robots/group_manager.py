@@ -178,7 +178,6 @@ class GroupManager:
                 )
                 if np.linalg.norm(leader_dxu) < 0.03:
                     desired_leader_position.pop(group_id)
-                print(leader_dxu)
             else:
                 leader_dxu = leader_dxus.get(group_id, np.array([[0], [0]]))
             dxu_dict.update(
@@ -194,9 +193,12 @@ class GroupManager:
         dxu = uni_barrier_certs(dxu, agent_positions)
         return dxu
 
-    def closest_leader_to_point(self, agent_positions, pt):
+    def closest_leader_to_point(self, agent_positions, pt, ndx):
         leader_positions = agent_positions[:2, self.leaders]
         dists = np.linalg.norm(leader_positions - pt, axis=0)
+        dists_in_range = dists[dists < 0.1]
+        if not dists_in_range.size > 0:
+            return ndx
         closest_leader_ndx = np.argmin(dists)
         return closest_leader_ndx
 
