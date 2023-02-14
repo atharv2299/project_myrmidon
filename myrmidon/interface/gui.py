@@ -36,8 +36,6 @@ class GUI:
         self.selector = self.fig.canvas.mpl_connect(
             "button_press_event", self.selection
         )
-        cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
-
         # Initialize Matplotlib features
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
@@ -85,9 +83,9 @@ class GUI:
         #     self.root, text=" Distance: " + str(self.get_dist)
         # ).place(x=910, y=390)
 
-        button_go_to_point = Button(
-            self.root, text="Go To Point", command=self.go_to_point
-        ).place(x=800, y=480)
+        # button_go_to_point = Button(
+        #     self.root, text="Go To Point", command=self.go_to_point
+        # ).place(x=800, y=480)
 
         # TODO: Check select_groups() for reference
         # self.selected_groups = np.array()
@@ -150,9 +148,8 @@ class GUI:
         #       ('double' if event.dblclick else 'single', event.button,
         #        event.x, event.y, event.xdata, event.ydata))
         # TODO: closest leader to point takes all agent positions and then finds the leaders from there
-        if self.leader_selection_flag:
-            pos = np.array([[event.xdata], [event.ydata]])
-            print(pos)
+        pos = np.array([[event.xdata], [event.ydata]])
+        if event.button == 1:
             if self.group_manager.leaders.size > 0:
                 ndx = self.group_manager.closest_leader_to_point(
                     agent_positions=self.agent_positions, pt=pos
@@ -160,15 +157,7 @@ class GUI:
                 self._controlled_group_ndx = (
                     self._controlled_group_ndx if ndx is None else ndx
                 )
-            # self.leader_selection_flag = False
-
-    def onclick(self, event):
-        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-        #       ('double' if event.dblclick else 'single', event.button,
-        #        event.x, event.y, event.xdata, event.ydata))
-        # TODO: closest leader to point takes all agent positions and then finds the leaders from there
-        if self.go_to_point_flag:
-            pos = np.array([[event.xdata], [event.ydata]])
+        if event.button == 3:
             print(f"Going to: {pos}")
             leader_pos = self.group_leader_position(self.controlled_group_id)
             if leader_pos is not None:
@@ -176,17 +165,26 @@ class GUI:
             self.go_to_point_flag = False
             self.leader_selection_flag = True
 
-    def go_to_point(self):
-        # set Flag to True
-        # gtg_flag = True
-        self.leader_selection_flag = False
-        self.go_to_point_flag = True
-        print("Go To Point")
+            # self.leader_selection_flag = False
 
-        # while True:
-        #     gtg_pos = np.array([[cid.x], [cid.y]])
-        # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
-        # gtg_flag = False
+    # def onclick(self, event):
+    #     # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+    #     #       ('double' if event.dblclick else 'single', event.button,
+    #     #        event.x, event.y, event.xdata, event.ydata))
+    #     # TODO: closest leader to point takes all agent positions and then finds the leaders from there
+    #     if self.go_to_point_flag:
+
+    # def go_to_point(self):
+    #     # set Flag to True
+    #     # gtg_flag = True
+    #     self.leader_selection_flag = False
+    #     self.go_to_point_flag = True
+    #     print("Go To Point")
+
+    # while True:
+    #     gtg_pos = np.array([[cid.x], [cid.y]])
+    # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
+    # gtg_flag = False
 
     # TODO: Move this, doesn't need to be in the group_manager, gui has access to this info
     def group_leader_position(self, group_id):
