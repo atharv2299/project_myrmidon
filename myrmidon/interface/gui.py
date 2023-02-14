@@ -20,11 +20,6 @@ class GUI:
         self.leader_controller = leader_controller
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
-        # self._selected_group_ndx = [0, None]
-        # self._selection_ndx_marker = 0
-        # self._second_group_ndx = None
-        self.leader_selection_flag = True
-        self.go_to_point_flag = False
         self.leader_pos = {}
         self._controlled_group_ndx = 0
         self.agent_positions = agent_positions
@@ -34,7 +29,7 @@ class GUI:
         self.fig = self.robotarium_figure
         plt.close(robotarium_figure)
         self.selector = self.fig.canvas.mpl_connect(
-            "button_press_event", self.selection
+            "button_press_event", self.mouse_click_func
         )
         # Initialize Matplotlib features
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
@@ -42,9 +37,6 @@ class GUI:
         self.canvas.get_tk_widget().place(x=20, y=30)
 
         # Display Buttons, Sliders
-        button_select = Button(
-            self.root, text="Select", command=self.button_select
-        ).place(x=800, y=30)
         button_unselect = Button(
             self.root, text="Unselect", command=self.root.destroy
         ).place(x=900, y=30)
@@ -75,62 +67,36 @@ class GUI:
             self.root, text="-", width=3, command=self.remove_robot
         ).place(x=925, y=300)
 
-        # self.scale1 = Scale(
-        #     self.root, variable=v1, from_=0.5, to=1.0, orient=HORIZONTAL
-        # ).place(x=800, y=390)
-        # scale1 = CTk.CTkSlider(master=self.root, from_=0, to=100, variable=v1)
-        # self.label_scale1 = Label(
-        #     self.root, text=" Distance: " + str(self.get_dist)
-        # ).place(x=910, y=390)
-
-        # button_go_to_point = Button(
-        #     self.root, text="Go To Point", command=self.go_to_point
-        # ).place(x=800, y=480)
-
-        # TODO: Check select_groups() for reference
-        # self.selected_groups = np.array()
-
-    # # TODO: Check if I did this even close to right
-    # def select_groups(self, group_id):
-    #     # selected_groups = np.array()
-    #     self.selected_groups.append(group_id)
-    #     self.selected_groups = np.unique(self.selected_groups)
-    #     return self.selected_groups
-
-    # def clear_select(self):
-    #     self.selected_groups = np.array()
-
     # Define button functions
-    # group_manager.function_call()
     def button_join(self):
-        print("Aggregate function plz")
+        # TODO: Implement combining
+        print("IMPLEMENT COMBINING!!!")
         # group_manager.combine(
-        #     main_group_id=selected_groups[-2],
+        #     main_group_id=self.controlled_group_id,
         #     other_group_id=selected_groups[-1]
         # )
-        # self.group_manager.clear_select()
 
     def button_separate(self):
-        print("Separate function plz")
+        print("Splitting group!")
         self.group_manager.split(group_id=self.controlled_group_id, num_groups=2)
 
     def button_newleader(self):
-        print("New Leader function plz")
+        print("Creating New Leader!")
         group_id = self.group_manager.create()
         self.group_manager.add_to_group(group_id)
 
     def button_disband(self):
-        print("Disband function plz")
+        print("Disbanding group!")
         self.group_manager.disband(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
 
     def add_robot(self):
-        print("Add Robot")
+        print("Adding Robot to group!")
         self.group_manager.add_to_group(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
 
     def remove_robot(self):
-        print("Remove Robot")
+        print("Removing Robot from group!")
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
 
@@ -139,16 +105,11 @@ class GUI:
             len(self.group_ids)
         )
 
-    def button_select(self):
-        self.leader_selection_flag = True
-        self.fig.canvas.mpl_connect("button_press_event", self.selection)
-
-    def selection(self, event):
-        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-        #       ('double' if event.dblclick else 'single', event.button,
-        #        event.x, event.y, event.xdata, event.ydata))
-        # TODO: closest leader to point takes all agent positions and then finds the leaders from there
+    def mouse_click_func(self, event):
+        # print(event.button)
+        # print(int(event.button))
         pos = np.array([[event.xdata], [event.ydata]])
+        # Left Click:
         if event.button == 1:
             if self.group_manager.leaders.size > 0:
                 ndx = self.group_manager.closest_leader_to_point(
@@ -157,36 +118,28 @@ class GUI:
                 self._controlled_group_ndx = (
                     self._controlled_group_ndx if ndx is None else ndx
                 )
+        # Right Click:
         if event.button == 3:
             print(f"Going to: {pos}")
             leader_pos = self.group_leader_position(self.controlled_group_id)
             if leader_pos is not None:
                 self.leader_pos.update({self.controlled_group_id: pos})
-            self.go_to_point_flag = False
-            self.leader_selection_flag = True
+        # Middle Click:
+        if event.button == 2:
+            if (
+                self.group_manager.leaders.size > 0
+                and len(self.group_manager.groups) >= 2
+            ):
+                ndx = self.group_manager.closest_leader_to_point(
+                    agent_positions=self.agent_positions, pt=pos
+                )
+                if ndx is not None and ndx != self._controlled_group_ndx:
+                    self.group_manager.combine(
+                        main_group_id=self.controlled_group_id,
+                        other_group_id=self.group_ids[ndx],
+                    )
+            print(self._controlled_group_ndx)
 
-            # self.leader_selection_flag = False
-
-    # def onclick(self, event):
-    #     # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-    #     #       ('double' if event.dblclick else 'single', event.button,
-    #     #        event.x, event.y, event.xdata, event.ydata))
-    #     # TODO: closest leader to point takes all agent positions and then finds the leaders from there
-    #     if self.go_to_point_flag:
-
-    # def go_to_point(self):
-    #     # set Flag to True
-    #     # gtg_flag = True
-    #     self.leader_selection_flag = False
-    #     self.go_to_point_flag = True
-    #     print("Go To Point")
-
-    # while True:
-    #     gtg_pos = np.array([[cid.x], [cid.y]])
-    # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
-    # gtg_flag = False
-
-    # TODO: Move this, doesn't need to be in the group_manager, gui has access to this info
     def group_leader_position(self, group_id):
         if group_id not in self.group_manager.groups:
             return
@@ -196,9 +149,6 @@ class GUI:
     def update_gui(self):
         self.canvas.draw()
         self.toolbar.update()
-        # print(c.groups.formations)
-        # print(c.groups.controlled_formation)
-        # c.drive_robots()
 
     def get_group_id_from_ndx(self, ndx):
         if ndx >= len(self.group_ids):
