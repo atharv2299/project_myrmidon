@@ -41,10 +41,10 @@ def initialize_plot(r, x, num_agents):
 
 
 def update_plot(group_manager, line_follower, leader_labels, x, controlled_group):
+    # TODO: Update plotting for GUI and TUI
     if not group_manager.groups:
         for leader_label in leader_labels:
             leader_label.set_alpha(0)
-        # TODO: Bug in plotting when disbanding group 1
         for line in line_follower:
             line[0].set_alpha(0)
         return leader_labels, line_follower

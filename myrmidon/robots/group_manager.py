@@ -15,6 +15,7 @@ def update_laplacian(func):
     return wrapper
 
 
+# TODO: Threading
 class GroupManager:
     """_summary_"""
 
@@ -242,3 +243,5 @@ class GroupManager:
             self._needs_laplacian_update = False
 
         return self._block_L
+
+    # TODO: Return leader position given group_id

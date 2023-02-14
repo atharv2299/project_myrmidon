@@ -4,16 +4,16 @@ import rps.robotarium as robotarium
 from pynput import keyboard
 from rps.utilities.barrier_certificates import *
 from rps.utilities.controllers import *
+from tkinter import Tk
 
 from myrmidon import utils
 from myrmidon.interface import TUI
+from myrmidon.interface import GUI
 from myrmidon.robots import GroupManager
 
 plt.rcParams["keymap.save"].remove("s")
 _N = 10
 
-group_manager = GroupManager({}, _N)
-tui = TUI(group_manager, True)
 initial_conditions = np.array(
     [
         [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],
@@ -47,7 +47,10 @@ r = robotarium.Robotarium(
 )
 x = r.get_poses()
 r.step()
-
+root = Tk()
+group_manager = GroupManager({}, _N)
+tui = TUI(group_manager, True)
+gui = GUI(root, group_manager, r.figure, leader_controller)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )
@@ -66,6 +69,7 @@ while not tui.exit:
         uni_barrier_certs,
     )
 
+    gui.update_gui()
     r.set_velocities(np.arange(_N), dxu)
 
     x = r.get_poses()
@@ -80,4 +84,5 @@ while not tui.exit:
 
     r.step()
 
+root.mainloop()
 r.call_at_scripts_end()
