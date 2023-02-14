@@ -50,7 +50,7 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
 tui = TUI(group_manager, True)
-gui = GUI(root, group_manager, r.figure, leader_controller)
+gui = GUI(root, group_manager, r.figure, leader_controller, x)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )
@@ -83,6 +83,6 @@ while not tui.exit:
     )
 
     r.step()
-
+root.destroy()
 root.mainloop()
 r.call_at_scripts_end()

@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 
 
 class GUI:
-    def __init__(self, root, group_manager, robotarium_figure, leader_controller):
+    def __init__(
+        self, root, group_manager, robotarium_figure, leader_controller, agent_positions
+    ):
         self.root = root
         self.group_manager = group_manager
         self.robotarium_figure = robotarium_figure
@@ -19,8 +21,10 @@ class GUI:
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
         self._controlled_group_ndx = 0
+        self.agent_positions = agent_positions
 
-        # TODO: Need way to access self.selected_groups from group_manager
+        # TODO: Need way to access self.selected_groups from
+        # The GUI is going to track selected groups, group_manager will not know what groups a person has selected, the gui will tell it what to do and with what group
 
         # Iniitialize for Robotarium
         self.fig = Figure(figsize=(5, 5), dpi=100, facecolor="w")
@@ -33,12 +37,12 @@ class GUI:
         self.canvas.get_tk_widget().place(x=20, y=30)
 
         # Display Buttons, Sliders
-        button_select = Button(self.root, text="Select", command=self.root.destroy).place(
-            x=800, y=30
-        )
-        button_unselect = Button(self.root, text="Unselect", command=self.root.destroy).place(
-            x=900, y=30
-        )
+        button_select = Button(
+            self.root, text="Select", command=self.root.destroy
+        ).place(x=800, y=30)
+        button_unselect = Button(
+            self.root, text="Unselect", command=self.root.destroy
+        ).place(x=900, y=30)
 
         button_newleader = Button(
             self.root, text="New Leader", command=self.button_join, state=NORMAL
@@ -62,9 +66,9 @@ class GUI:
 
         entry_curr_robot_count = Entry(self.root, width=5).place(x=867, y=300)
 
-        button_remove = Button(self.root, text="-", width=3, command=self.remove_robot).place(
-            x=925, y=300
-        )
+        button_remove = Button(
+            self.root, text="-", width=3, command=self.remove_robot
+        ).place(x=925, y=300)
 
         # self.scale1 = Scale(
         #     self.root, variable=v1, from_=0.5, to=1.0, orient=HORIZONTAL
@@ -75,7 +79,7 @@ class GUI:
         # ).place(x=910, y=390)
 
         button_go_to_point = Button(
-            self.root, text="Go To Point", command=self.go_to_point
+            self.root, text="Go To Point", command=self.debugging_func
         ).place(x=800, y=480)
 
     # Define button functions
@@ -102,34 +106,31 @@ class GUI:
 
     def button_disband(self):
         print("Disband function plz")
-        group_manager.disband(
-            group_id=selected_groups[-1]
-        )
+        group_manager.disband(group_id=selected_groups[-1])
         group_manager.clear_select()
 
     def add_robot(self):
         print("Add Robot")
-        group_manager.add_to_group(
-            group_id=selected_groups[-1]
-        )
+        group_manager.add_to_group(group_id=selected_groups[-1])
         group_manager.clear_select()
 
     def remove_robot(self):
         print("Remove Robot")
-        group_manager.remove_from_group(
-            group_id=selected_groups[-1]
-        )
+        group_manager.remove_from_group(group_id=selected_groups[-1])
         group_manager.clear_select()
 
     def onclick(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #       ('double' if event.dblclick else 'single', event.button,
         #        event.x, event.y, event.xdata, event.ydata))
+        # TODO: closest leader to point takes all agent positions and then finds the leaders from there
         pos = np.array([[event.x], [event.y]])
-        group_id  = group_manager.closest_leader_to_point(
-            agent_positions=leader_positions,
-            pt = pos
-        )
+        if self.group_manager.leaders.size > 0:
+            leader_ndx = self.group_manager.closest_leader_to_point(
+                agent_positions=self.agent_positions, pt=pos
+            )
+            group_id = self.get_group_id_from_ndx(leader_ndx)
+
         # selected_groups = group_manager.select_groups(group_id)
 
         # Sends to group_manager.closest_leader -> group_id Leader Selection
@@ -148,13 +149,21 @@ class GUI:
             # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
         gtg_flag = False
 
-
     def update_gui(self):
         self.canvas.draw()
         self.toolbar.update()
         # print(c.groups.formations)
         # print(c.groups.controlled_formation)
         # c.drive_robots()
+
+    def get_group_id_from_ndx(self, ndx):
+        if ndx >= len(self.group_ids):
+            return None
+        return self.group_ids[ndx]
+
+    @property
+    def group_ids(self):
+        return list(self.group_manager.groups.keys())
 
     @property
     def controlled_group_id(self):

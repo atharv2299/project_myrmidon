@@ -55,8 +55,14 @@ class GroupManager:
         self._block_L = None
         self._needs_laplacian_update = False
         # TODO: Check select_groups() for reference
-        self.selected_groups = np.array()
+        # self.selected_groups = np.array()
 
+    # TODO: Check if I did this even close to right
+    # def select_groups(self, group_id):
+    #     # selected_groups = np.array()
+    #     self.selected_groups.append(group_id)
+    #     self.selected_groups = np.unique(self.selected_groups)
+    #     return self.selected_groups
     # @update_laplacian
     def create(self):
         """_summary_"""
@@ -148,13 +154,6 @@ class GroupManager:
         if not self.groups[group_id].agents:
             self.disband(group_id)
 
-    # TODO: Check if I did this even close to right
-    def select_groups(self, group_id):
-        # selected_groups = np.array()
-        self.selected_groups.append(group_id)
-        self.selected_groups = np.unique(self.selected_groups)
-        return self.selected_groups
-
     def clear_select(self):
         self.selected_groups = np.array()
 
@@ -196,13 +195,16 @@ class GroupManager:
         return dxu
 
     def closest_leader_to_point(self, agent_positions, pt):
-        # TODO: Return group_id not leader
         leader_positions = agent_positions[:2, self.leaders]
         dists = np.linalg.norm(leader_positions - pt, axis=0)
         closest_leader_ndx = np.argmin(dists)
-        closest_leader = self.leaders[closest_leader_ndx]
-        group_id = None
-        return group_id
+        return closest_leader_ndx
+
+    # TODO: Move this, doesn't need to be in the group_manager, gui has access to this info
+    def group_leader_position(self, group_id, agent_positions):
+        if group_id not in self.groups:
+            return None
+        return agent_positions[self.groups[group_id][0]]
 
     @property
     def leaders(self):
@@ -255,5 +257,3 @@ class GroupManager:
             self._needs_laplacian_update = False
 
         return self._block_L
-
-    # TODO: Return leader position given group_id
