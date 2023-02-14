@@ -30,7 +30,8 @@ _garage = np.array(
     ]
 )
 garage_return_controller = create_hybrid_unicycle_pose_controller()
-leader_controller = create_hybrid_unicycle_pose_controller()
+# leader_controller = create_hybrid_unicycle_pose_controller()
+leader_controller = create_clf_unicycle_position_controller()
 uni_barrier_certs = create_unicycle_barrier_certificate_with_boundary(
     safety_radius=0.12, projection_distance=0.04
 )
@@ -65,8 +66,10 @@ while not tui.exit:
         _garage,
         x,
         garage_return_controller,
+        leader_controller,
         si_to_uni_dyn,
         uni_barrier_certs,
+        gui.leader_pos,
     )
 
     gui.update_gui()

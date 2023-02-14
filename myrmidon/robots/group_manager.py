@@ -54,18 +54,6 @@ class GroupManager:
         self.garage = Group("Garage", list(range(num_agents)))
         self._block_L = None
         self._needs_laplacian_update = False
-        # TODO: Check select_groups() for reference
-        # self.selected_groups = np.array()
-
-    # TODO: Check if I did this even close to right
-    # def select_groups(self, group_id):
-    #     # selected_groups = np.array()
-    #     self.selected_groups.append(group_id)
-    #     self.selected_groups = np.unique(self.selected_groups)
-    #     return self.selected_groups
-
-    # def clear_select(self):
-    #     self.selected_groups = np.array()
 
     # @update_laplacian
     def create(self):
@@ -164,8 +152,10 @@ class GroupManager:
         garage_locs,
         agent_positions,
         garage_controller,
+        leader_position_controller,
         si_to_uni_dyn,
         uni_barrier_certs,
+        desired_leader_position,
     ):
         """_summary_"""
 
@@ -181,7 +171,16 @@ class GroupManager:
         dxu_dict = {}
         dxu_dict.update(garage_dxu())
         for group_id, group in self.groups.items():
-            leader_dxu = leader_dxus.get(group_id, np.array([[0], [0]]))
+            if group_id in desired_leader_position:
+                leader_dxu = leader_position_controller(
+                    agent_positions[:, [self.groups[group_id].agents[0]]],
+                    desired_leader_position.get(group_id),
+                )
+                if np.linalg.norm(leader_dxu) < 0.03:
+                    desired_leader_position.pop(group_id)
+                print(leader_dxu)
+            else:
+                leader_dxu = leader_dxus.get(group_id, np.array([[0], [0]]))
             dxu_dict.update(
                 group.calculate_follower_dxus(
                     agent_positions, leader_dxu, si_to_uni_dyn
@@ -200,12 +199,6 @@ class GroupManager:
         dists = np.linalg.norm(leader_positions - pt, axis=0)
         closest_leader_ndx = np.argmin(dists)
         return closest_leader_ndx
-
-    # TODO: Move this, doesn't need to be in the group_manager, gui has access to this info
-    def group_leader_position(self, group_id, agent_positions):
-        if group_id not in self.groups:
-            return None
-        return agent_positions[self.groups[group_id][0]]
 
     @property
     def leaders(self):

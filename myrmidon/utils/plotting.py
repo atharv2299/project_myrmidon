@@ -80,14 +80,16 @@ def update_plot(
             # print(ndx)
             # print(tui_controlled_group.agents[0])
             # print(gui_controlled_group.agents[0])
-            if ndx == tui_controlled_group.agents[0]:
-                leader_label.set_edgecolor("cyan")
-            else:
-                leader_label.set_edgecolor("red")
-            if ndx == gui_controlled_group.agents[0]:
-                leader_label.set_facecolor("black")
-            else:
-                leader_label.set_facecolor("none")
+            if tui_controlled_group:
+                if ndx == tui_controlled_group.agents[0]:
+                    leader_label.set_edgecolor("cyan")
+                else:
+                    leader_label.set_edgecolor("red")
+            if gui_controlled_group:
+                if ndx == gui_controlled_group.agents[0]:
+                    leader_label.set_facecolor("black")
+                else:
+                    leader_label.set_facecolor("none")
         else:
             leader_label.set_alpha(0)
 

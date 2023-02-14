@@ -20,16 +20,23 @@ class GUI:
         self.leader_controller = leader_controller
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
+        # self._selected_group_ndx = [0, None]
+        # self._selection_ndx_marker = 0
+        # self._second_group_ndx = None
+        self.leader_selection_flag = True
+        self.go_to_point_flag = False
+        self.leader_pos = {}
         self._controlled_group_ndx = 0
         self.agent_positions = agent_positions
-
-        # TODO: Need way to access self.selected_groups from group_manager
-        # The GUI is going to track selected groups, group_manager will not know what groups a person has selected, the gui will tell it what to do and with what group
 
         # Iniitialize for Robotarium
         self.fig = Figure(figsize=(5, 5), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
         plt.close(robotarium_figure)
+        self.selector = self.fig.canvas.mpl_connect(
+            "button_press_event", self.selection
+        )
+        cid = self.fig.canvas.mpl_connect("button_press_event", self.onclick)
 
         # Initialize Matplotlib features
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
@@ -38,7 +45,7 @@ class GUI:
 
         # Display Buttons, Sliders
         button_select = Button(
-            self.root, text="Select", command=self.root.destroy
+            self.root, text="Select", command=self.button_select
         ).place(x=800, y=30)
         button_unselect = Button(
             self.root, text="Unselect", command=self.root.destroy
@@ -79,8 +86,21 @@ class GUI:
         # ).place(x=910, y=390)
 
         button_go_to_point = Button(
-            self.root, text="Go To Point", command=self.onclick
+            self.root, text="Go To Point", command=self.go_to_point
         ).place(x=800, y=480)
+
+        # TODO: Check select_groups() for reference
+        # self.selected_groups = np.array()
+
+    # # TODO: Check if I did this even close to right
+    # def select_groups(self, group_id):
+    #     # selected_groups = np.array()
+    #     self.selected_groups.append(group_id)
+    #     self.selected_groups = np.unique(self.selected_groups)
+    #     return self.selected_groups
+
+    # def clear_select(self):
+    #     self.selected_groups = np.array()
 
     # Define button functions
     # group_manager.function_call()
@@ -94,11 +114,7 @@ class GUI:
 
     def button_separate(self):
         print("Separate function plz")
-        # self.group_manager.split(
-        #     group_id=selected_groups[-1],
-        #     num_groups=2
-        # )
-        # self.group_manager.clear_select()
+        self.group_manager.split(group_id=self.controlled_group_id, num_groups=2)
 
     def button_newleader(self):
         print("New Leader function plz")
@@ -125,35 +141,56 @@ class GUI:
             len(self.group_ids)
         )
 
+    def button_select(self):
+        self.leader_selection_flag = True
+        self.fig.canvas.mpl_connect("button_press_event", self.selection)
+
+    def selection(self, event):
+        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #       ('double' if event.dblclick else 'single', event.button,
+        #        event.x, event.y, event.xdata, event.ydata))
+        # TODO: closest leader to point takes all agent positions and then finds the leaders from there
+        if self.leader_selection_flag:
+            pos = np.array([[event.xdata], [event.ydata]])
+            print(pos)
+            if self.group_manager.leaders.size > 0:
+                self._controlled_group_ndx = self.group_manager.closest_leader_to_point(
+                    agent_positions=self.agent_positions, pt=pos
+                )
+            # self.leader_selection_flag = False
+
     def onclick(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #       ('double' if event.dblclick else 'single', event.button,
         #        event.x, event.y, event.xdata, event.ydata))
         # TODO: closest leader to point takes all agent positions and then finds the leaders from there
-        pos = np.array([[event.x], [event.y]])
-        if self.group_manager.leaders.size > 0:
-            leader_ndx = self.group_manager.closest_leader_to_point(
-                agent_positions=self.agent_positions, pt=pos
-            )
-            group_id = self.get_group_id_from_ndx(leader_ndx)
+        if self.go_to_point_flag:
+            pos = np.array([[event.xdata], [event.ydata]])
+            print(f"Going to: {pos}")
+            leader_pos = self.group_leader_position(self.controlled_group_id)
+            if leader_pos is not None:
+                self.leader_pos.update({self.controlled_group_id: pos})
+            self.go_to_point_flag = False
+            self.leader_selection_flag = True
 
-        # selected_groups = group_manager.select_groups(group_id)
-
-        # Sends to group_manager.closest_leader -> group_id Leader Selection
-        # Feeds point into leader_dxu = {group_id: (self.leader_controller(leader_position, pt))}
-        # Should probably use leader_dxu.update
-        print(pos)
-        return pos
-
-    def go_to_point(self, event):
+    def go_to_point(self):
         # set Flag to True
-        gtg_flag = True
+        # gtg_flag = True
+        self.leader_selection_flag = False
+        self.go_to_point_flag = True
         print("Go To Point")
-        # cid = fig.canvas.mpl_connect("button_press_event", self.onclick)
-        while True:
-            gtg_pos = np.array([[event.x], [event.y]])
-            # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
-        gtg_flag = False
+
+        # while True:
+        #     gtg_pos = np.array([[cid.x], [cid.y]])
+        # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
+        # gtg_flag = False
+
+    # TODO: Move this, doesn't need to be in the group_manager, gui has access to this info
+    def group_leader_position(self, group_id):
+        if group_id not in self.group_manager.groups:
+            return
+        leader_idx = self.group_manager.groups[group_id].agents[0]
+        return self.agent_positions[:, [leader_idx]]
 
     def update_gui(self):
         self.canvas.draw()
