@@ -154,10 +154,11 @@ class GUI:
             pos = np.array([[event.xdata], [event.ydata]])
             print(pos)
             if self.group_manager.leaders.size > 0:
-                self._controlled_group_ndx = self.group_manager.closest_leader_to_point(
-                    agent_positions=self.agent_positions,
-                    pt=pos,
-                    ndx=self._controlled_group_ndx,
+                ndx = self.group_manager.closest_leader_to_point(
+                    agent_positions=self.agent_positions, pt=pos
+                )
+                self._controlled_group_ndx = (
+                    self._controlled_group_ndx if ndx is None else ndx
                 )
             # self.leader_selection_flag = False
 

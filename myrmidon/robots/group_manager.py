@@ -193,12 +193,12 @@ class GroupManager:
         dxu = uni_barrier_certs(dxu, agent_positions)
         return dxu
 
-    def closest_leader_to_point(self, agent_positions, pt, ndx):
+    def closest_leader_to_point(self, agent_positions, pt):
         leader_positions = agent_positions[:2, self.leaders]
         dists = np.linalg.norm(leader_positions - pt, axis=0)
         dists_in_range = dists[dists < 0.1]
         if not dists_in_range.size > 0:
-            return ndx
+            return
         closest_leader_ndx = np.argmin(dists)
         return closest_leader_ndx
 
