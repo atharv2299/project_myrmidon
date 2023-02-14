@@ -54,6 +54,8 @@ class GroupManager:
         self.garage = Group("Garage", list(range(num_agents)))
         self._block_L = None
         self._needs_laplacian_update = False
+        # TODO: Check select_groups() for reference
+        self.selected_groups = np.array()
 
     # @update_laplacian
     def create(self):
@@ -145,6 +147,16 @@ class GroupManager:
         self.garage.add(self.groups[group_id].remove())
         if not self.groups[group_id].agents:
             self.disband(group_id)
+
+    # TODO: Check if I did this even close to right
+    def select_groups(self, group_id):
+        # selected_groups = np.array()
+        self.selected_groups.append(group_id)
+        self.selected_groups = np.unique(self.selected_groups)
+        return self.selected_groups
+
+    def clear_select(self):
+        self.selected_groups = np.array()
 
     def get_dxu(
         self,

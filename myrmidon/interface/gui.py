@@ -20,22 +20,23 @@ class GUI:
         self.root.geometry("1200x600")
         self._controlled_group_ndx = 0
 
+        # TODO: Need way to access self.selected_groups from group_manager
+
         # Iniitialize for Robotarium
         self.fig = Figure(figsize=(5, 5), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
         plt.close(robotarium_figure)
+
         # Initialize Matplotlib features
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
-        # canvas.get_tk_widget().pack(side="left")
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
-        # canvas.get_tk_widget().pack(side="left")
         self.canvas.get_tk_widget().place(x=20, y=30)
 
         # Display Buttons, Sliders
-        button11 = Button(self.root, text="Select", command=self.root.destroy).place(
+        button_select = Button(self.root, text="Select", command=self.root.destroy).place(
             x=800, y=30
         )
-        button12 = Button(self.root, text="Unselect", command=self.root.destroy).place(
+        button_unselect = Button(self.root, text="Unselect", command=self.root.destroy).place(
             x=900, y=30
         )
 
@@ -43,7 +44,7 @@ class GUI:
             self.root, text="New Leader", command=self.button_join, state=NORMAL
         ).place(x=800, y=120)
 
-        button2 = Button(
+        button_join = Button(
             self.root, text="Join", command=self.button_join, state=NORMAL
         ).place(x=1000, y=120)
 
@@ -51,19 +52,19 @@ class GUI:
             self.root, text="Disband Group", command=self.button_disband, state=NORMAL
         ).place(x=800, y=210)
 
-        button3 = Button(
+        button_separate = Button(
             self.root, text="Separate", command=self.button_separate
         ).place(x=1000, y=210)
 
-        button4 = Button(self.root, text="+", width=3, command=self.add_robot).place(
+        button_add = Button(self.root, text="+", width=3, command=self.add_robot).place(
             x=800, y=300
-        )  # command=c.groups.add_agent
+        )
 
-        entry4 = Entry(self.root, width=5).place(x=867, y=300)
+        entry_curr_robot_count = Entry(self.root, width=5).place(x=867, y=300)
 
-        button4 = Button(self.root, text="-", width=3, command=self.remove_robot).place(
+        button_remove = Button(self.root, text="-", width=3, command=self.remove_robot).place(
             x=925, y=300
-        )  # command=partial(c.groups.split_network, c.L, c.dists)
+        )
 
         # self.scale1 = Scale(
         #     self.root, variable=v1, from_=0.5, to=1.0, orient=HORIZONTAL
@@ -73,49 +74,80 @@ class GUI:
         #     self.root, text=" Distance: " + str(self.get_dist)
         # ).place(x=910, y=390)
 
-        self.button5 = Button(
+        button_go_to_point = Button(
             self.root, text="Go To Point", command=self.go_to_point
         ).place(x=800, y=480)
 
     # Define button functions
-    # group_manager.fucntion_call()
+    # group_manager.function_call()
     def button_join(self):
         print("Aggregate function plz")
+        # group_manager.combine(
+        #     main_group_id=selected_groups[-2],
+        #     other_group_id=selected_groups[-1]
+        # )
+        group_manager.clear_select()
 
     def button_separate(self):
         print("Separate function plz")
+        # group_manager.split(
+        #     group_id=selected_groups[-1],
+        #     num_groups=2
+        # )
+        group_manager.clear_select()
 
     def button_newleader(self):
         print("New Leader function plz")
+        group_manager.create()
 
     def button_disband(self):
         print("Disband function plz")
+        group_manager.disband(
+            group_id=selected_groups[-1]
+        )
+        group_manager.clear_select()
 
     def add_robot(self):
         print("Add Robot")
-        # c.groups.add_agent()
+        group_manager.add_to_group(
+            group_id=selected_groups[-1]
+        )
+        group_manager.clear_select()
 
     def remove_robot(self):
         print("Remove Robot")
-        # c.groups.split_network(c.L, c.dists)
-
-    def todo():
-        pass
+        group_manager.remove_from_group(
+            group_id=selected_groups[-1]
+        )
+        group_manager.clear_select()
 
     def onclick(self, event):
         # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
         #       ('double' if event.dblclick else 'single', event.button,
         #        event.x, event.y, event.xdata, event.ydata))
         pos = np.array([[event.x], [event.y]])
+        group_id  = group_manager.closest_leader_to_point(
+            agent_positions=leader_positions,
+            pt = pos
+        )
+        # selected_groups = group_manager.select_groups(group_id)
+
         # Sends to group_manager.closest_leader -> group_id Leader Selection
         # Feeds point into leader_dxu = {group_id: (self.leader_controller(leader_position, pt))}
         # Should probably use leader_dxu.update
         print(pos)
         return pos
 
-    def go_to_point(self):
+    def go_to_point(self, event):
+        # set Flag to True
+        gtg_flag = True
         print("Go To Point")
         # cid = fig.canvas.mpl_connect("button_press_event", self.onclick)
+        while True:
+            gtg_pos = np.array([[event.x], [event.y]])
+            # Push gtg_pos into a dxu_controller for go_to_point with selected_groups[-1]
+        gtg_flag = False
+
 
     def update_gui(self):
         self.canvas.draw()
