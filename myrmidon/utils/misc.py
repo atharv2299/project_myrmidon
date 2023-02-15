@@ -38,3 +38,13 @@ def time_func(func):
         return ret
 
     return wrapper
+
+
+def lock(func):
+    def wrapper(self, *args, **kwargs):
+        self.lock.acquire()
+        ret = func(self, *args, **kwargs)
+        self.lock.release()
+        return ret
+
+    return wrapper

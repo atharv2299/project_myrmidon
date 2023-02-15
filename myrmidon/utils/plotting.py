@@ -22,7 +22,7 @@ def initialize_plot(r, x, num_agents):
         for kk in range(0, len((rows)))
     ]
 
-    marker_size = determine_marker_size(r, 0.1)
+    marker_size = determine_marker_size(r, utils.constants.LEADER_SELECTION_RADIUS)
     leader_labels = [
         r.axes.scatter(
             x[0, kk],
@@ -40,11 +40,18 @@ def initialize_plot(r, x, num_agents):
     return leader_labels, line_follower
 
 
-def update_plot(group_manager, line_follower, leader_labels, x, controlled_group):
+def update_plot(
+    group_manager,
+    line_follower,
+    leader_labels,
+    x,
+    tui_controlled_group,
+    gui_controlled_group,
+):
+    # TODO: Update plotting for GUI and TUI
     if not group_manager.groups:
         for leader_label in leader_labels:
             leader_label.set_alpha(0)
-        # TODO: Bug in plotting when disbanding group 1
         for line in line_follower:
             line[0].set_alpha(0)
         return leader_labels, line_follower
@@ -60,7 +67,7 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
 
     # TODO: Highlight controlled formation - get from UI
     # for i in range(len(leader_labels)):
-    #     if i == controlled_group.agents[0]:
+    #     if i == tui_controlled_group.agents[0]:
     #         leader_labels[i].set_alpha(1)
     #         leader_labels[i].set_offsets(x[:2, i].T)
     #     else:
@@ -70,10 +77,19 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
         if ndx in group_manager.leaders:
             leader_label.set_alpha(1)
             leader_label.set_offsets(x[:2, ndx].T)
-            if ndx == controlled_group.agents[0]:
-                leader_label.set_edgecolor("lime")
-            else:
-                leader_label.set_edgecolor("red")
+            # print(ndx)
+            # print(tui_controlled_group.agents[0])
+            # print(gui_controlled_group.agents[0])
+            if tui_controlled_group:
+                if ndx == tui_controlled_group.agents[0]:
+                    leader_label.set_edgecolor("cyan")
+                else:
+                    leader_label.set_edgecolor("red")
+            if gui_controlled_group:
+                if ndx == gui_controlled_group.agents[0]:
+                    leader_label.set_facecolor("black")
+                else:
+                    leader_label.set_facecolor("none")
         else:
             leader_label.set_alpha(0)
 
@@ -98,22 +114,7 @@ def update_plot(group_manager, line_follower, leader_labels, x, controlled_group
     return leader_labels, line_follower
 
 
-COLORS = [
-    "orange",
-    "skyblue",
-    "royalblue",
-    "purple",
-    "green",
-    "black",
-    "darkslateblue",
-    "cyan",
-    "fuchsia",
-    "gold",
-    "white",
-]
-
-
 def get_color(agent_num, group_manager):
     for key, group in group_manager.groups.items():
         if agent_num in group.agents:
-            return COLORS[key % len(COLORS)]
+            return utils.constants.COLORS[key % len(utils.constants.COLORS)]

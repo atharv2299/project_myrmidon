@@ -1,9 +1,11 @@
 import copy
+import threading
 
 import numpy as np
 
 from myrmidon import utils
 from myrmidon.robots.group import Group
+from myrmidon.utils.misc import lock
 
 
 def update_laplacian(func):
@@ -15,6 +17,7 @@ def update_laplacian(func):
     return wrapper
 
 
+# TODO: Threading
 class GroupManager:
     """_summary_"""
 
@@ -53,6 +56,7 @@ class GroupManager:
         self.garage = Group("Garage", list(range(num_agents)))
         self._block_L = None
         self._needs_laplacian_update = False
+        self.lock = threading.Lock()
 
     # @update_laplacian
     def create(self):
@@ -90,6 +94,7 @@ class GroupManager:
         if group_id in self.groups:
             del self.groups[group_id]
 
+    @lock
     @update_laplacian
     def combine(self, main_group_id, other_group_id):
         """_summary_
@@ -105,6 +110,7 @@ class GroupManager:
         other_group.clear()
         self.disband(other_group_id)
 
+    @lock
     @update_laplacian
     def split(self, group_id, num_groups):
         """_summary_
@@ -122,6 +128,7 @@ class GroupManager:
         group.clear()
         group.extend(chunks[0])
 
+    @lock
     @update_laplacian
     def add_to_group(self, group_id):
         """_summary_
@@ -134,6 +141,7 @@ class GroupManager:
             return
         self.groups[group_id].add(self.garage.remove())
 
+    @lock
     @update_laplacian
     def remove_from_group(self, group_id):
         """_summary_
@@ -145,14 +153,17 @@ class GroupManager:
         if not self.groups[group_id].agents:
             self.disband(group_id)
 
+    @lock
     def get_dxu(
         self,
         leader_dxus,
         garage_locs,
         agent_positions,
         garage_controller,
+        leader_position_controller,
         si_to_uni_dyn,
         uni_barrier_certs,
+        desired_leader_position,
     ):
         """_summary_"""
 
@@ -168,7 +179,22 @@ class GroupManager:
         dxu_dict = {}
         dxu_dict.update(garage_dxu())
         for group_id, group in self.groups.items():
-            leader_dxu = leader_dxus.get(group_id, np.array([[0], [0]]))
+            if group_id in desired_leader_position:
+                gui_leader_dxu = leader_position_controller(
+                    agent_positions[:, [self.groups[group_id].agents[0]]],
+                    desired_leader_position.get(group_id),
+                )
+                if (
+                    np.linalg.norm(
+                        agent_positions[:2, [self.groups[group_id].agents[0]]]
+                        - desired_leader_position.get(group_id)
+                    )
+                    <= utils.constants.CLOSE_ENOUGH
+                ):
+                    desired_leader_position.pop(group_id)
+            else:
+                gui_leader_dxu = np.array([[0], [0]])
+            leader_dxu = leader_dxus.get(group_id, gui_leader_dxu)
             dxu_dict.update(
                 group.calculate_follower_dxus(
                     agent_positions, leader_dxu, si_to_uni_dyn
@@ -183,13 +209,13 @@ class GroupManager:
         return dxu
 
     def closest_leader_to_point(self, agent_positions, pt):
-        # TODO: Return group_id not leader
         leader_positions = agent_positions[:2, self.leaders]
         dists = np.linalg.norm(leader_positions - pt, axis=0)
+        dists_in_range = dists[dists < utils.constants.LEADER_SELECTION_RADIUS]
+        if not dists_in_range.size > 0:
+            return
         closest_leader_ndx = np.argmin(dists)
-        closest_leader = self.leaders[closest_leader_ndx]
-        group_id = None
-        return group_id
+        return closest_leader_ndx
 
     @property
     def leaders(self):
