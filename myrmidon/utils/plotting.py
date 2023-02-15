@@ -22,7 +22,7 @@ def initialize_plot(r, x, num_agents):
         for kk in range(0, len((rows)))
     ]
 
-    marker_size = determine_marker_size(r, 0.1)
+    marker_size = determine_marker_size(r, utils.constants.LEADER_SELECTION_RADIUS)
     leader_labels = [
         r.axes.scatter(
             x[0, kk],
@@ -114,22 +114,7 @@ def update_plot(
     return leader_labels, line_follower
 
 
-COLORS = [
-    "orange",
-    "skyblue",
-    "royalblue",
-    "purple",
-    "green",
-    "black",
-    "darkslateblue",
-    "cyan",
-    "fuchsia",
-    "gold",
-    "white",
-]
-
-
 def get_color(agent_num, group_manager):
     for key, group in group_manager.groups.items():
         if agent_num in group.agents:
-            return COLORS[key % len(COLORS)]
+            return utils.constants.COLORS[key % len(utils.constants.COLORS)]

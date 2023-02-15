@@ -1,14 +1,14 @@
+from tkinter import Tk
+
 import matplotlib.pyplot as plt
 import numpy as np
 import rps.robotarium as robotarium
 from pynput import keyboard
 from rps.utilities.barrier_certificates import *
 from rps.utilities.controllers import *
-from tkinter import Tk
 
 from myrmidon import utils
-from myrmidon.interface import TUI
-from myrmidon.interface import GUI
+from myrmidon.interface import GUI, TUI
 from myrmidon.robots import GroupManager
 
 plt.rcParams["keymap.save"].remove("s")
@@ -51,7 +51,7 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
 tui = TUI(group_manager, True)
-gui = GUI(root, group_manager, r.figure, leader_controller, x)
+gui = GUI(root, group_manager, r.figure, x)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )
@@ -61,6 +61,14 @@ listener = keyboard.Listener(on_press=tui.on_press, suppress=False)
 listener.start()
 
 while not tui.exit:
+    if gui.gui_override:
+        if (
+            tui.controlled_group_id in tui.leader_dxu
+            and tui.controlled_group_id == gui.controlled_group_id
+        ):
+            tui.leader_dxu.pop(tui.controlled_group_id)
+        gui.gui_override = False
+
     dxu = group_manager.get_dxu(
         tui.leader_dxu,
         _garage,

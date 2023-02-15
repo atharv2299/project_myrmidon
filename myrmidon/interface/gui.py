@@ -2,27 +2,28 @@ import matplotlib
 import numpy as np
 
 matplotlib.use("TkAgg")
+import threading
+from functools import partial
 from tkinter import *
 from tkinter.ttk import *
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from functools import partial
+
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
 
 
 class GUI:
-    def __init__(
-        self, root, group_manager, robotarium_figure, leader_controller, agent_positions
-    ):
+    # TODO: See if keyboard is possible
+    def __init__(self, root, group_manager, robotarium_figure, agent_positions):
         self.root = root
         self.group_manager = group_manager
         self.robotarium_figure = robotarium_figure
-        self.leader_controller = leader_controller
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
-        self.leader_pos = {}
+        self.leader_pos_dict = {}
         self._controlled_group_ndx = 0
         self.agent_positions = agent_positions
+        self.gui_override = False
 
         # Iniitialize for Robotarium
         self.fig = Figure(figsize=(5, 5), dpi=100, facecolor="w")
@@ -68,6 +69,7 @@ class GUI:
         ).place(x=925, y=300)
 
     # Define button functions
+
     def button_join(self):
         # TODO: Implement combining
         print("IMPLEMENT COMBINING!!!")
@@ -88,6 +90,7 @@ class GUI:
     def button_disband(self):
         print("Disbanding group!")
         self.group_manager.disband(group_id=self.controlled_group_id)
+
         # self.group_manager.clear_select()
 
     def add_robot(self):
@@ -121,9 +124,11 @@ class GUI:
         # Right Click:
         if event.button == 3:
             print(f"Going to: {pos}")
-            leader_pos = self.group_leader_position(self.controlled_group_id)
-            if leader_pos is not None:
-                self.leader_pos.update({self.controlled_group_id: pos})
+            leader_position = self.group_leader_position(self.controlled_group_id)
+            if leader_position is not None:
+                self.leader_pos_dict.update({self.controlled_group_id: pos})
+            self.gui_override = True
+
         # Middle Click:
         if event.button == 2:
             if (
@@ -154,6 +159,15 @@ class GUI:
         if ndx >= len(self.group_ids):
             return None
         return self.group_ids[ndx]
+
+    @property
+    def leader_pos(self):
+        keys = self.leader_pos_dict.keys()
+        for key in list(keys):
+            if key not in self.group_manager.groups:
+                self.leader_pos_dict.pop(key)
+
+        return self.leader_pos_dict
 
     @property
     def group_ids(self):
