@@ -84,6 +84,7 @@ while not tui.exit:
     r.set_velocities(np.arange(_N), dxu)
 
     x = r.get_poses()
+    gui.update_gui_positions(x)
 
     leader_labels, line_follower = utils.plotting.update_plot(
         group_manager,

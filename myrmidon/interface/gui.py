@@ -160,6 +160,9 @@ class GUI:
             return None
         return self.group_ids[ndx]
 
+    def update_gui_positions(self, positions):
+        self.agent_positions = positions
+
     @property
     def leader_pos(self):
         keys = self.leader_pos_dict.keys()
