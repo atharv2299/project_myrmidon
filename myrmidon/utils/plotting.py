@@ -82,12 +82,12 @@ def update_plot(
             # print(gui_controlled_group.agents[0])
             if tui_controlled_group:
                 if ndx == tui_controlled_group.agents[0]:
-                    leader_label.set_edgecolor("cyan")
+                    leader_label.set_edgecolor("lime")
                 else:
                     leader_label.set_edgecolor("red")
             if gui_controlled_group:
                 if ndx == gui_controlled_group.agents[0]:
-                    leader_label.set_facecolor("black")
+                    leader_label.set_facecolor("green")
                 else:
                     leader_label.set_facecolor("none")
         else:

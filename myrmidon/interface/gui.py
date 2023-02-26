@@ -16,10 +16,12 @@ class GUI:
     # TODO: See if keyboard is possible
     def __init__(self, root, group_manager, robotarium_figure, agent_positions):
         self.root = root
-        self.group_manager = group_manager
-        self.robotarium_figure = robotarium_figure
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
+
+        self.group_manager = group_manager
+        self.robotarium_figure = robotarium_figure
+
         self.leader_pos_dict = {}
         self._controlled_group_ndx = 0
         self.agent_positions = agent_positions
