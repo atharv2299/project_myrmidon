@@ -3,7 +3,26 @@ import numpy as np
 
 def complete_GL(num_bots):
     L = num_bots * np.identity(num_bots) - np.ones((num_bots, num_bots))
+    # TODO: Figure out the dists
     return L
+
+
+def line_GL(num_bots):
+    ones = np.ones(num_bots - 1)
+    L = 2 * np.identity(num_bots) - np.diag(ones, 1) - np.diag(ones, -1)
+    L[0, 0] = 1
+    L[num_bots - 1, num_bots - 1] = 1
+    dists = -L
+    return L, dists
+
+
+def cycle_GL(num_bots):
+    ones = np.ones(num_bots - 1)
+    L = 2 * np.identity(num_bots) - np.diag(ones, 1) - np.diag(ones, -1)
+    L[num_bots - 1, 0] = -1
+    L[0, num_bots - 1] = -1
+    dists = -L
+    return L, dists
 
 
 def _rigid_cycle_GL_leaderless(num_bots):
