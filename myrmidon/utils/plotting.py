@@ -23,6 +23,7 @@ def initialize_plot(r, x, num_agents):
     ]
 
     marker_size = determine_marker_size(r, utils.constants.LEADER_SELECTION_RADIUS)
+    marker_size = determine_marker_size(r, utils.constants.LEADER_SELECTION_RADIUS)
     leader_labels = [
         r.axes.scatter(
             x[0, kk],
@@ -68,6 +69,7 @@ def update_plot(
     # TODO: Highlight controlled formation - get from UI
     # for i in range(len(leader_labels)):
     #     if i == tui_controlled_group.agents[0]:
+    #     if i == tui_controlled_group.agents[0]:
     #         leader_labels[i].set_alpha(1)
     #         leader_labels[i].set_offsets(x[:2, i].T)
     #     else:
@@ -82,12 +84,12 @@ def update_plot(
             # print(gui_controlled_group.agents[0])
             if tui_controlled_group:
                 if ndx == tui_controlled_group.agents[0]:
-                    leader_label.set_edgecolor("cyan")
+                    leader_label.set_edgecolor("lime")
                 else:
                     leader_label.set_edgecolor("red")
             if gui_controlled_group:
                 if ndx == gui_controlled_group.agents[0]:
-                    leader_label.set_facecolor("black")
+                    leader_label.set_facecolor("green")
                 else:
                     leader_label.set_facecolor("none")
         else:
@@ -117,4 +119,5 @@ def update_plot(
 def get_color(agent_num, group_manager):
     for key, group in group_manager.groups.items():
         if agent_num in group.agents:
+            return utils.constants.COLORS[key % len(utils.constants.COLORS)]
             return utils.constants.COLORS[key % len(utils.constants.COLORS)]
