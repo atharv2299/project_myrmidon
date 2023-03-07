@@ -77,9 +77,7 @@ def update_plot(
         if ndx in group_manager.leaders:
             leader_label.set_alpha(1)
             leader_label.set_offsets(x[:2, ndx].T)
-            # print(ndx)
-            # print(tui_controlled_group.agents[0])
-            # print(gui_controlled_group.agents[0])
+
             if tui_controlled_group:
                 if ndx == tui_controlled_group.agents[0]:
                     leader_label.set_edgecolor("lime")

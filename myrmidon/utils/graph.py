@@ -1,10 +1,42 @@
 import numpy as np
 
 
+def complete_GL_leaderless(num_bots):
+    if num_bots == 1:
+        return np.zeros((1, 1)), np.zeros((1, 1))
+    elif num_bots == 2:
+        followers = np.array([[1, -1], [-1, 1]])
+        follower_dists = -followers
+        return followers, follower_dists
+    followers = num_bots * np.identity(num_bots) - np.ones((num_bots, num_bots))
+    # Dists:
+    # where k is the distance apart
+    # sin(k*np.pi/num_bots)/sin(np.pi/num_bots)
+    follower_dists = np.zeros((num_bots, num_bots))
+    for k in range(num_bots):
+        offset = k
+        ones = np.ones(num_bots - (offset))
+        dist = np.sin(k * np.pi / num_bots) / np.sin(np.pi / num_bots) * ones
+        follower_dists += np.diag(dist, offset) + np.diag(dist, -offset)
+    return followers, follower_dists
+
+
 def complete_GL(num_bots):
-    L = num_bots * np.identity(num_bots) - np.ones((num_bots, num_bots))
-    # TODO: Figure out the dists
-    return L
+    if num_bots == 1:
+        return np.zeros((1, 1)), np.zeros((1, 1))
+    followers, follower_dists = complete_GL_leaderless(num_bots - 1)
+    L = np.zeros((num_bots, num_bots))
+    L[1:num_bots, 1:num_bots] = followers
+    L[1, 1] += 1
+    L[1, 0] = -1
+    dists = np.zeros((num_bots, num_bots))
+    dists[1:num_bots, 1:num_bots] = follower_dists
+    dists[1, 0] = 1
+    if num_bots > 2:
+        L[2, 2] += 1
+        L[2, 0] = -1
+        dists[2, 0] = 1
+    return -L, dists
 
 
 def line_GL(num_bots):
@@ -12,7 +44,7 @@ def line_GL(num_bots):
     L = 2 * np.identity(num_bots) - np.diag(ones, 1) - np.diag(ones, -1)
     L[0, 0] = 1
     L[num_bots - 1, num_bots - 1] = 1
-    dists = -L
+    dists = np.diag(ones, 1) + np.diag(ones, -1)
     return L, dists
 
 
@@ -21,7 +53,9 @@ def cycle_GL(num_bots):
     L = 2 * np.identity(num_bots) - np.diag(ones, 1) - np.diag(ones, -1)
     L[num_bots - 1, 0] = -1
     L[0, num_bots - 1] = -1
-    dists = -L
+    dists = np.diag(ones, 1) + np.diag(ones, -1)
+    dists[num_bots - 1, 0] = -1
+    dists[0, num_bots - 1] = -1
     return L, dists
 
 
@@ -32,7 +66,6 @@ def _rigid_cycle_GL_leaderless(num_bots):
         followers = np.array([[1, -1], [-1, 1]])
         follower_dists = -followers
         return followers, follower_dists
-
     rigid_connects = np.resize([1, 0], (num_bots - 2,))
     # * (1 / np.cos(np.pi /  num_bots))
     adjustment = 2 * np.cos(np.pi / num_bots)
