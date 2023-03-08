@@ -1,5 +1,6 @@
 import numpy as np
 from myrmidon import utils
+from myrmidon.utils.graph import Graphs
 
 # TODO: ALL DOCUMENTATION
 
@@ -22,6 +23,7 @@ class Group:
         self._L = None
         self.dists = None
         self._needs_laplacian_update = False
+        self.graph = Graphs.MINIMAL
 
     @update_laplacian
     def add(self, agent_id):
@@ -86,12 +88,27 @@ class Group:
         dxu[self.agents[0]] = leader_dxu
         return dxu
 
+    @update_laplacian
+    def set_graph(self, graph):
+        self.graph = graph
+
     @property
     def L(self):
         if self._needs_laplacian_update:
             if not self.agents:
                 self._L = self.dists = None
             else:
-                self._L, self.dists = utils.graph.rigid_cycle_GL(len(self.agents))
+                self._L, self.dists = self.create_graph(len(self.agents))
             self._needs_laplacian_update = False
         return self._L
+
+    @property
+    def create_graph(self):
+        if self.graph == Graphs.MINIMAL:
+            return utils.graph.rigid_minimal_GL()
+        elif self.graph == Graphs.CYCLE:
+            return utils.graph.cycle_GL()
+        elif self.graph == Graphs.COMPLETE:
+            return utils.graph.complete_GL()
+        elif self.graph == Graphs.LINE:
+            return utils.graph.line_GL()
