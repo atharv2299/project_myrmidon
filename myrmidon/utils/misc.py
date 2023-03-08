@@ -1,11 +1,13 @@
-import numpy as np
-import time
 import math
+import time
+
+import numpy as np
 
 
 def chunks(seq, num_chunks):
     chunk_size = int(math.ceil(len(seq) / num_chunks))
     # TODO: Look into floor and then modulo to add on the remainder
+    # TODO: Replace with numpy parts(?) or whatever it is
     for i in range(num_chunks):
         yield seq[i * chunk_size : (i + 1) * chunk_size]
 
@@ -48,3 +50,6 @@ def lock(func):
         return ret
 
     return wrapper
+
+
+# TODO: Add custom barrier functions here:

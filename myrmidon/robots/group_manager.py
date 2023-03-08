@@ -154,6 +154,11 @@ class GroupManager:
             self.disband(group_id)
 
     @lock
+    @update_laplacian
+    def change_group_graph(self, group_id, graph):
+        self.groups[group_id].set_graph(graph)
+
+    @lock
     def get_dxu(
         self,
         leader_dxus,
@@ -220,6 +225,16 @@ class GroupManager:
     @property
     def leaders(self):
         return np.array([group.agents[0] for group in self.groups.values()])
+
+    @property
+    def followers(self):
+        return np.array(
+            [
+                np.array(group.agents[1:])
+                for group in self.groups.values()
+                if len(group.agents) > 1
+            ]
+        ).reshape((-1))
 
     @property
     def num_agents(self):

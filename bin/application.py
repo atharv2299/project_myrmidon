@@ -94,7 +94,14 @@ while not tui.exit:
         tui.controlled_group,
         gui.controlled_group,
     )
-
+    # leader_labels2, line_follower2 = utils.plotting.update_plot(
+    #     group_manager,
+    #     line_follower2,
+    #     leader_labels2,
+    #     x,
+    #     tui.controlled_group,
+    #     gui.controlled_group,
+    # )
     r.step()
 root.destroy()
 root.mainloop()
