@@ -222,6 +222,16 @@ class GroupManager:
         return np.array([group.agents[0] for group in self.groups.values()])
 
     @property
+    def followers(self):
+        return np.array(
+            [
+                np.array(group.agents[1:])
+                for group in self.groups.values()
+                if len(group.agents) > 1
+            ]
+        ).reshape((-1))
+
+    @property
     def num_agents(self):
         return sum([len(group.agents) for group in self.groups.values()]) + len(
             self.garage.agents

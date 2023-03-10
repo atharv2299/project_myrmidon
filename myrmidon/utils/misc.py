@@ -1,6 +1,7 @@
-import numpy as np
-import time
 import math
+import time
+
+import numpy as np
 
 
 def chunks(seq, num_chunks):

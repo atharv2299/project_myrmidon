@@ -71,6 +71,10 @@ def cycle_GL(num_bots=1):
     return build_graph
 
 
+def directed_cycle_GL(self):
+    pass
+
+
 def _rigid_minimal_GL_leaderless(num_bots):
     if num_bots == 1:
         return np.zeros((1, 1)), np.zeros((1, 1))
@@ -141,3 +145,4 @@ class Graphs(Enum):
     CYCLE = 2
     LINE = 3
     COMPLETE = 4
+    CYCLE_DIRECTED = 5

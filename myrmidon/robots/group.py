@@ -44,11 +44,11 @@ class Group:
     def set_dist_scale(self, new_dist_scale):
         self.dist_scale = new_dist_scale
 
-    def calculate_follower_dxus(self, positions, leader_dxu, si_to_uni_dyn):
+    def calculate_follower_dxus(self, poses, leader_dxu, si_to_uni_dyn):
         """BARRIERLESS DXU
 
         Args:
-            positions (_type_): _description_
+            poses (_type_): _description_
             leader_dxu (_type_): _description_
             si_to_uni_dyn (_type_): _description_
 
@@ -60,8 +60,8 @@ class Group:
 
         dxs = np.zeros((2, len(self.agents)))
         dxu = {}
+        L = self.L.copy()
         for ndx, agent_id in enumerate(self.agents):
-            L = self.L.copy()
             neighbors = utils.graph.topological_neighbors(L, ndx)
             for neighbor_ndx in neighbors:
                 neighbor = self.agents[neighbor_ndx]
@@ -70,19 +70,35 @@ class Group:
                     * (
                         np.power(
                             np.linalg.norm(
-                                positions[:2, [neighbor]] - positions[:2, [agent_id]]
+                                poses[:2, [neighbor]] - poses[:2, [agent_id]]
                             ),
                             2,
                         )
                         - np.power(self.dist_scale * self.dists[ndx, neighbor_ndx], 2)
                     )
-                    * (positions[:2, [neighbor]] - positions[:2, [agent_id]])
+                    * (poses[:2, [neighbor]] - poses[:2, [agent_id]])
                 )
-                dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], positions[:, [agent_id]])
+                dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], poses[:, [agent_id]])
         # TODO: Scale leader dxu based on distance to connected followers
+        # TODO: Add unique leader barriers
+        # leader_barrier = unicycle_connectivity_barriers(
+        #     connectivity_radius=self.dist_scale * 1.1
+        # )
+        # barriered_dxu = leader_barrier(leader_dxu, poses[:, [self.agents[0]]])
+        # print(leader_dxu)
+        # print(barriered_dxu)
+        # barriered_dxu = leader_dxu
         # leader_follower_ndx = np.array(list(set(utils.misc.find_connections(-L)[0])))
-        # leader_followers = self.agents[leader_follower_ndx]
-        # leader_follower_positions = positions[:2, leader_followers]
+        # leader_ndx = 0
+        # leader_positon = positions[:2, [leader_ndx]]
+        # leader_follower_ndx = utils.graph.topological_neighbors(L, leader_ndx)
+        # if leader_follower_ndx:
+        #     leader_follower_ids = self.agents[leader_follower_ndx]
+        #     leader_follower_positions = positions[:2, [leader_follower_ids]]
+        #     actual_follower_dists = np.linalg.norm(leader_positon - leader_follower_positions)
+        #     desired_follower_dists = self.dist_scale * self.dists[leader_ndx, leader_follower_ndx]
+
+        # scaling_factor = 1 or
         # # print(positions)
         # print(leader_follower_positions)
         dxu[self.agents[0]] = leader_dxu
