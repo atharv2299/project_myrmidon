@@ -1,0 +1,7 @@
+setup.py
+myrmidon/__init__.py
+myrmidon.egg-info/PKG-INFO
+myrmidon.egg-info/SOURCES.txt
+myrmidon.egg-info/dependency_links.txt
+myrmidon.egg-info/requires.txt
+myrmidon.egg-info/top_level.txt

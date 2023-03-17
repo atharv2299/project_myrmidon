@@ -61,7 +61,7 @@ class GUI:
         ).place(x=1000, y=210)
 
         button_add = Button(self.root, text="+", width=3, command=self.add_robot).place(
-            x=800, y=300
+            x=960, y=300
         )
 
         entry_curr_robot_count = Entry(self.root, width=5).place(x=867, y=300)
@@ -69,6 +69,22 @@ class GUI:
         button_remove = Button(
             self.root, text="-", width=3, command=self.remove_robot
         ).place(x=925, y=300)
+
+        formation_options = [
+            'Complete',
+            'Complete',
+            'Line',
+            'Cycle',
+            'Rigid Cycle',
+            'Leaderless Rigid',
+        ]
+        
+        formation_var = StringVar(self.root)
+        formation_var.set('Cycle')
+
+        dropdown_formation = OptionMenu(
+            self.root, formation_var, *formation_options, command=self.formation_switch()
+        ).place(x=900, y=400)
 
     # Define button functions
 
@@ -104,6 +120,13 @@ class GUI:
         print("Removing Robot from group!")
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
+
+    def formation_switch(self):
+        # selected = formation_var.get()
+        # print(selected)
+        pass
+        # Add logic to relate string of dropdown menu to function calls from graph
+        # If selected == 'Standard': complete_gl(num_bots)
 
     def next_controlled_group(self):
         self._controlled_group_ndx = (self._controlled_group_ndx + 1) % (
