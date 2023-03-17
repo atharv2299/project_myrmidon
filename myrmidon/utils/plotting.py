@@ -93,22 +93,20 @@ def update_plot(
 
     for i, j in zip(rows, cols):
 
-        if j in leaders:
-            line_follower[i][0].set_data(
-                [x[0, i], x[0, j]],
-                [x[1, i], x[1, j]],
-            )
-            line_follower[i][0].set_alpha(1)
-            line_follower[i][0].set_color(get_color(j, group_manager))
-        else:
-            line_follower[i * (num_bots - 1) + j][0].set_data(
-                [x[0, i], x[0, j]],
-                [x[1, i], x[1, j]],
-            )
-            line_follower[i * (num_bots - 1) + j][0].set_alpha(1)
-            line_follower[i * (num_bots - 1) + j][0].set_color(
-                get_color(j, group_manager)
-            )
+        # if j in leaders:
+        #     line_follower[i][0].set_data(
+        #         [x[0, i], x[0, j]],
+        #         [x[1, i], x[1, j]],
+        #     )
+        #     line_follower[i][0].set_alpha(1)
+        #     line_follower[i][0].set_color(get_color(j, group_manager))
+        # else:
+        line_follower[i * (num_bots - 1) + j][0].set_data(
+            [x[0, i], x[0, j]],
+            [x[1, i], x[1, j]],
+        )
+        line_follower[i * (num_bots - 1) + j][0].set_alpha(1)
+        line_follower[i * (num_bots - 1) + j][0].set_color(get_color(j, group_manager))
     return leader_labels, line_follower
 
 
@@ -116,3 +114,4 @@ def get_color(agent_num, group_manager):
     for key, group in group_manager.groups.items():
         if agent_num in group.agents:
             return utils.constants.COLORS[key % len(utils.constants.COLORS)]
+    print(f"{agent_num} is not in a group")

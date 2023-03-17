@@ -13,3 +13,4 @@ COLORS = [
     "gold",
     "white",
 ]
+MAX_DIST_SCALE = 0.45

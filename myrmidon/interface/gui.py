@@ -140,12 +140,12 @@ class GUI:
                 ndx = self.group_manager.closest_leader_to_point(
                     agent_positions=self.agent_positions, pt=pos
                 )
+
                 if ndx is not None and ndx != self._controlled_group_ndx:
                     self.group_manager.combine(
                         main_group_id=self.controlled_group_id,
                         other_group_id=self.group_ids[ndx],
                     )
-            print(self._controlled_group_ndx)
 
     def group_leader_position(self, group_id):
         if group_id not in self.group_manager.groups:
@@ -180,12 +180,16 @@ class GUI:
 
     @property
     def controlled_group_id(self):
-        if self._controlled_group_ndx >= len(self.group_ids):
+        if not self.group_ids:
             return None
+        if self._controlled_group_ndx >= len(self.group_ids):
+            self.next_controlled_group()
         return self.group_ids[self._controlled_group_ndx]
 
     @property
     def controlled_group(self):
-        if self._controlled_group_ndx >= len(self.group_ids):
+        if not self.group_ids:
             return None
+        if self._controlled_group_ndx >= len(self.group_ids):
+            self.next_controlled_group()
         return self.group_manager.groups[self.controlled_group_id]

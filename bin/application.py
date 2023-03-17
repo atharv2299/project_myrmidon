@@ -32,9 +32,9 @@ _garage = np.array(
 garage_return_controller = create_hybrid_unicycle_pose_controller()
 # leader_controller = create_hybrid_unicycle_pose_controller()
 leader_controller = create_clf_unicycle_position_controller()
-uni_barrier_certs = create_unicycle_barrier_certificate_with_boundary(
-    safety_radius=0.12, projection_distance=0.04
-)
+# uni_barrier_certs = create_unicycle_barrier_certificate_with_boundary(
+#     safety_radius=0.12, projection_distance=0.04
+# )
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
     linear_velocity_gain=0.75, angular_velocity_limit=np.pi
 )
@@ -54,6 +54,14 @@ tui = TUI(group_manager, True)
 gui = GUI(root, group_manager, r.figure, x)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
+)
+uni_barrier_certs = utils.custom_uni_barriers(
+    safety_radius=0.12,
+    projection_distance=0.05,
+    group_manager=group_manager,
+    connectivity_distance=1,
+    barrier_gain=100,
+    magnitude_limit=0.2,
 )
 
 

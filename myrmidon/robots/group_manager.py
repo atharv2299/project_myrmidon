@@ -57,17 +57,22 @@ class GroupManager:
         self._block_L = None
         self._needs_laplacian_update = False
         self.lock = threading.Lock()
+        self.num_agents = sum(
+            [len(group.agents) for group in self.groups.values()]
+        ) + len(self.garage.agents)
 
     # @update_laplacian
-    def create(self):
+    def create(self, split=False):
         """_summary_"""
-        if not self.garage.agents:
+
+        if not split and not self.garage.agents:
             return
 
         def generate_id():
             ndx = -1
+            # TODO: Look if there's a better way to do this:
             for key, ndx in zip(list(self.groups.keys()), range(len(self.groups))):
-                if key != ndx:
+                if key != ndx and ndx not in list(self.groups.keys()):
                     return ndx
             return ndx + 1
 
@@ -120,13 +125,15 @@ class GroupManager:
             num_groups (_type_): _description_
         """
         group = self.groups[group_id]
-        chunks = list(utils.chunks(group.agents, num_groups))
-        for agents in chunks[1:]:
+        # TODO: Check this works
+        # split_groups = np.array_split(group.agents, num_groups)
+        split_groups = list(utils.chunks(group.agents, num_groups))
+        for agents in split_groups[1:]:
             if agents:
-                new_group_id = self.create()
+                new_group_id = self.create(True)
                 self.groups[new_group_id].extend(agents)
         group.clear()
-        group.extend(chunks[0])
+        group.extend(split_groups[0])
 
     @lock
     @update_laplacian
@@ -210,6 +217,7 @@ class GroupManager:
         for agent_id in sorted(dxu_dict):
             dxu[:, [agent_id]] = dxu_dict[agent_id]
 
+        # TODO: Custom barrier function, pass in leaders and laplacian
         dxu = uni_barrier_certs(dxu, agent_positions)
         return dxu
 
@@ -235,12 +243,6 @@ class GroupManager:
                 if len(group.agents) > 1
             ]
         ).reshape((-1))
-
-    @property
-    def num_agents(self):
-        return sum([len(group.agents) for group in self.groups.values()]) + len(
-            self.garage.agents
-        )
 
     @property
     def block_L(self):

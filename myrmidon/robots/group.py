@@ -1,6 +1,7 @@
 import numpy as np
 from myrmidon import utils
 from myrmidon.utils.graph import Graphs
+from myrmidon.utils import constants
 
 # TODO: ALL DOCUMENTATION
 
@@ -42,7 +43,8 @@ class Group:
         self.agents.clear()
 
     def set_dist_scale(self, new_dist_scale):
-        self.dist_scale = new_dist_scale
+        if new_dist_scale <= constants.MAX_DIST_SCALE:
+            self.dist_scale = new_dist_scale
 
     def calculate_follower_dxus(self, poses, leader_dxu, si_to_uni_dyn):
         """BARRIERLESS DXU
