@@ -59,7 +59,7 @@ uni_barrier_certs = utils.custom_uni_barriers(
     safety_radius=0.12,
     projection_distance=0.05,
     group_manager=group_manager,
-    connectivity_distance=0.5,
+    connectivity_distance=0.7,
     barrier_gain=100,
     magnitude_limit=0.2,
 )

@@ -166,26 +166,26 @@ def si_barrier_with_connectivity_and_boundary(
             and (group_manager.block_L is not None)
         ):
 
-            L = group_manager.block_L.copy()
-            for agent_ndx in range(N):
-                if agent_ndx in group_manager.leaders:
-                    neighbors = topological_neighbors(L, agent_ndx)
-                    for neighbor_ndx in neighbors:
-                        error = x[:, agent_ndx] - x[:, neighbor_ndx]
-                        h = np.power(connectivity_distance, 2) - (
-                            error[0] * error[0] + error[1] * error[1]
-                        )
-
-                        i = np.zeros((1, 2 * N))
-                        i[0, (2 * agent_ndx, (2 * agent_ndx + 1))] = 2 * error
-                        # i[0, (2 * neighbor_ndx, (2 * neighbor_ndx + 1))] = -2 * error
-                        # print(i)
-                        A = np.vstack((A, i))
-                        # print(b.shape)
-                        b = np.hstack((b, barrier_gain * np.power(h, 3)))
-                        # print(b.shape)
-                        # print(f"I: {b[count]}")
-                        count += 1
+            for agent_ndx in group_manager.leaders:
+                L = group_manager.block_L.copy()
+                # if agent_ndx in group_manager.leaders:
+                neighbors = topological_neighbors(L, agent_ndx)
+                for neighbor_ndx in neighbors:
+                    error = x[:, agent_ndx] - x[:, neighbor_ndx]
+                    h = np.power(connectivity_distance, 2) - (
+                        error[0] * error[0] + error[1] * error[1]
+                    )
+                    # print(connectivity_distance)
+                    i = np.zeros((1, 2 * N))
+                    i[0, (2 * agent_ndx, (2 * agent_ndx + 1))] = 2 * error
+                    i[0, (2 * neighbor_ndx, (2 * neighbor_ndx + 1))] = -2 * error
+                    # print(i)
+                    A = np.vstack((A, i))
+                    # print(b.shape)
+                    b = np.hstack((b, 0.1 * barrier_gain * np.power(h, 3)))
+                    # print(b.shape)
+                    # print(f"I: {b[count]}")
+                    count += 1
         # Threshold control inputs before QP
         norms = np.linalg.norm(dxi, 2, 0)
         idxs_to_normalize = norms > magnitude_limit
