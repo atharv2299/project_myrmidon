@@ -165,6 +165,7 @@ def si_barrier_with_connectivity_and_boundary(
             and group_manager
             and (group_manager.block_L is not None)
         ):
+
             L = group_manager.block_L.copy()
             for agent_ndx in range(N):
                 if agent_ndx in group_manager.leaders:
@@ -176,10 +177,13 @@ def si_barrier_with_connectivity_and_boundary(
                         )
 
                         i = np.zeros((1, 2 * N))
-                        i[0, (2 * agent_ndx, (2 * neighbor_ndx))] = 2 * error
+                        i[0, (2 * agent_ndx, (2 * agent_ndx + 1))] = 2 * error
                         # i[0, (2 * neighbor_ndx, (2 * neighbor_ndx + 1))] = -2 * error
+                        # print(i)
                         A = np.vstack((A, i))
+                        # print(b.shape)
                         b = np.hstack((b, barrier_gain * np.power(h, 3)))
+                        # print(b.shape)
                         # print(f"I: {b[count]}")
                         count += 1
         # Threshold control inputs before QP
@@ -188,7 +192,7 @@ def si_barrier_with_connectivity_and_boundary(
         dxi[:, idxs_to_normalize] *= magnitude_limit / norms[idxs_to_normalize]
 
         f = -2 * np.reshape(dxi, (2 * N, 1), order="F")
-        b = np.reshape(b, (count, 1), order="F")
+        b = np.reshape(b, (-1, 1), order="F")
         result = qp(matrix(H), matrix(f), matrix(A), matrix(b))["x"]
         # result = solver2.solve_qp(H, f, A, b, 0)[0]
 
