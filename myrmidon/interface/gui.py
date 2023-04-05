@@ -39,9 +39,9 @@ class GUI:
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
         self.canvas.get_tk_widget().place(x=20, y=30)
 
-        # Initialize Dropdown options 
+        # Initialize Dropdown options
         self.formation_var = StringVar(self.root)
-        self.formation_var.set('Cycle')
+        self.formation_var.set("Cycle")
 
         # Display Buttons, Sliders
         button_unselect = Button(
@@ -75,16 +75,19 @@ class GUI:
         ).place(x=925, y=300)
 
         formation_options = [
-            'Complete',
-            'Complete',
-            'Line',
-            'Cycle',
-            'Rigid Cycle',
-            'Leaderless Rigid',
+            "Complete",
+            "Complete",
+            "Line",
+            "Cycle",
+            "Rigid Cycle",
+            "Leaderless Rigid",
         ]
 
         dropdown_formation = OptionMenu(
-            self.root, formation_var, *formation_options, command=self.formation_switch()
+            self.root,
+            formation_var,
+            *formation_options,
+            command=self.formation_switch(),
         ).place(x=900, y=400)
 
     # Define button functions
@@ -124,8 +127,10 @@ class GUI:
 
     def formation_switch(self):
         # selected = formation_var.get()
-        # self.utils.graph. 
-        self.group_manager.change_group_graph(group_id=self.controlled_group_id, self.formation_var.get())
+        # self.utils.graph.
+        self.group_manager.change_group_graph(
+            group_id=self.controlled_group_id, graph=self.formation_var.get()
+        )
         # print(selected)
         # pass
         # Add logic to relate string of dropdown menu to function calls from graph
