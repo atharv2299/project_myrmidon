@@ -1,4 +1,0 @@
-numpy
-pynput
-matplotlib
-robotarium-python-simulator
