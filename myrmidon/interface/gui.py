@@ -76,10 +76,11 @@ class GUI:
         ).place(x=925, y=300)
 
         formation_options = [
+            "",
+            "Rigid Minimal",
             "Complete",
             "Line",
             "Cycle",
-            "Rigid Minimal",
             "Directed Cycle",
         ]
         dropdown_formation = OptionMenu(
