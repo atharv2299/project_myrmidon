@@ -1,5 +1,3 @@
-from enum import Enum
-
 import numpy as np
 
 
@@ -146,12 +144,3 @@ def topological_neighbors(L, agent):
     row = copied[agent, :]
     row[agent] = 0
     return np.where(row != 0)[0]
-
-
-class Graphs(Enum):
-    # TODO: Change from numbers to strings
-    MINIMAL = 1
-    CYCLE = 2
-    LINE = 3
-    COMPLETE = 4
-    CYCLE_DIRECTED = 5

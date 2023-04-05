@@ -1,6 +1,5 @@
 import numpy as np
 from myrmidon import utils
-from myrmidon.utils.graph import Graphs
 from myrmidon.utils import constants
 
 # TODO: ALL DOCUMENTATION
@@ -24,7 +23,7 @@ class Group:
         self._L = None
         self.dists = None
         self._needs_laplacian_update = False
-        self.graph = Graphs.MINIMAL
+        self.graph = "Rigid Minimal"
 
     @update_laplacian
     def add(self, agent_id):
@@ -82,7 +81,8 @@ class Group:
         #         )
         #         dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], poses[:, [agent_id]])
         # dxu[self.agents[0]] =
-        if self.graph == Graphs.CYCLE_DIRECTED:
+
+        if self.graph == "Directed Cycle":
             dxu = self.cyclic_pursuit_control(poses, si_to_uni_dyn)
         else:
             dxu = self.leader_follower_control(poses, leader_dxu, si_to_uni_dyn)
@@ -92,7 +92,6 @@ class Group:
     def leader_follower_control(self, poses, leader_dxu, si_to_uni_dyn):
         if not self.agents:
             return {}
-
         dxs = np.zeros((2, len(self.agents)))
         dxu = {}
         L = self.L.copy()
@@ -134,7 +133,8 @@ class Group:
                 angle = agent_angle - theta_offset
                 magnitude = np.linalg.norm(delta)
                 dxs[:, [ndx]] += (
-                    magnitude * np.array([[np.cos(angle)], [np.sin(angle)]])
+                    magnitude
+                    * np.array([[np.cos(angle)], [np.sin(angle)]]).reshape((2, -1))
                     + self.control_gain * delta
                 )
                 dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], poses[:, [agent_id]])
@@ -142,7 +142,7 @@ class Group:
 
     @update_laplacian
     def set_graph(self, graph):
-        if graph in Graphs:
+        if graph in constants.GRAPHS:
             self.graph = graph
 
     @property
@@ -158,13 +158,13 @@ class Group:
     @property
     def create_graph(self):
         # TODO: Add .value to all of these
-        if self.graph == Graphs.MINIMAL:
+        if self.graph == "Rigid Minimal":
             return utils.graph.rigid_minimal_GL()
-        elif self.graph == Graphs.CYCLE:
+        elif self.graph == "Cycle":
             return utils.graph.cycle_GL()
-        elif self.graph == Graphs.COMPLETE:
+        elif self.graph == "Complete":
             return utils.graph.complete_GL()
-        elif self.graph == Graphs.LINE:
+        elif self.graph == "Line":
             return utils.graph.line_GL()
-        elif self.graph == Graphs.CYCLE_DIRECTED:
+        elif self.graph == "Directed Cycle":
             return utils.graph.directed_cycle_GL()

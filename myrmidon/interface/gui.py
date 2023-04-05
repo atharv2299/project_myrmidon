@@ -10,6 +10,7 @@ from tkinter.ttk import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
+from myrmidon.utils import constants
 
 
 class GUI:
@@ -41,7 +42,7 @@ class GUI:
 
         # Initialize Dropdown options
         self.formation_var = StringVar(self.root)
-        self.formation_var.set("Cycle")
+        self.formation_var.set("Rigid Minimal")
 
         # Display Buttons, Sliders
         button_unselect = Button(
@@ -76,18 +77,16 @@ class GUI:
 
         formation_options = [
             "Complete",
-            "Complete",
             "Line",
             "Cycle",
-            "Rigid Cycle",
-            "Leaderless Rigid",
+            "Rigid Minimal",
+            "Directed Cycle",
         ]
-
         dropdown_formation = OptionMenu(
             self.root,
-            formation_var,
+            self.formation_var,
             *formation_options,
-            command=self.formation_switch(),
+            command=self.formation_switch,
         ).place(x=900, y=400)
 
     # Define button functions
@@ -125,11 +124,12 @@ class GUI:
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
 
-    def formation_switch(self):
-        # selected = formation_var.get()
+    def formation_switch(self, graph):
+        print(graph)
+        # selected = self.formation_var.get()
         # self.utils.graph.
         self.group_manager.change_group_graph(
-            group_id=self.controlled_group_id, graph=self.formation_var.get()
+            group_id=self.controlled_group_id, graph=graph
         )
         # print(selected)
         # pass

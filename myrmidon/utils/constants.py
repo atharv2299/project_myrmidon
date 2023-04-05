@@ -14,3 +14,11 @@ COLORS = [
     "white",
 ]
 MAX_DIST_SCALE = 0.45
+
+GRAPHS = [
+    "Complete",
+    "Line",
+    "Cycle",
+    "Rigid Minimal",
+    "Directed Cycle",
+]
