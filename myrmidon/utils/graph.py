@@ -149,6 +149,7 @@ def topological_neighbors(L, agent):
 
 
 class Graphs(Enum):
+    # TODO: Change from numbers to strings
     MINIMAL = 1
     CYCLE = 2
     LINE = 3

@@ -157,6 +157,7 @@ class Group:
 
     @property
     def create_graph(self):
+        # TODO: Add .value to all of these
         if self.graph == Graphs.MINIMAL:
             return utils.graph.rigid_minimal_GL()
         elif self.graph == Graphs.CYCLE:
