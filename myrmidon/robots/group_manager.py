@@ -60,6 +60,7 @@ class GroupManager:
         self.num_agents = sum(
             [len(group.agents) for group in self.groups.values()]
         ) + len(self.garage.agents)
+        self.start_barriers = False
 
     # @update_laplacian
     def create(self, split=False):

@@ -54,7 +54,7 @@ class GUI:
         ).place(x=800, y=120)
 
         button_join = Button(
-            self.root, text="Join", command=self.next_controlled_group, state=NORMAL
+            self.root, text="Join", command=self.button_join, state=NORMAL
         ).place(x=1000, y=120)
 
         button_disband = Button(
@@ -95,6 +95,7 @@ class GUI:
     def button_join(self):
         # TODO: Implement combining
         print("IMPLEMENT COMBINING!!!")
+        self.group_manager.start_barriers = not self.group_manager.start_barriers
         # group_manager.combine(
         #     main_group_id=self.controlled_group_id,
         #     other_group_id=selected_groups[-1]
