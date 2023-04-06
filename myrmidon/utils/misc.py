@@ -225,7 +225,7 @@ def si_barrier_with_connectivity_and_boundary(
         f = -2 * np.reshape(dxi, (2 * N, 1), order="F")
         b = np.reshape(b, (-1, 1), order="F")
         solved_qp = qp(matrix(H), matrix(f), matrix(A), matrix(b))
-        print(solved_qp)
+        # print(solved_qp)
         result = solved_qp["x"]
         # result = solver2.solve_qp(H, f, A, b, 0)[0]
 
