@@ -49,7 +49,7 @@ def line_GL(num_bots=1):
         L[0, 0] = 1
         L[num_bots - 1, num_bots - 1] = 1
         dists = np.diag(ones, 1) + np.diag(ones, -1)
-        return L, dists
+        return -L, dists
 
     return build_graph
 
@@ -64,7 +64,7 @@ def cycle_GL(num_bots=1):
         dists = np.diag(ones, 1) + np.diag(ones, -1)
         dists[num_bots - 1, 0] = 1
         dists[0, num_bots - 1] = 1
-        return L, dists
+        return -L, dists
 
     return build_graph
 
@@ -76,7 +76,7 @@ def directed_cycle_GL(num_bots=1):
         L[num_bots - 1, 0] = -1
         dists = np.diag(ones, 1)
         dists[num_bots - 1, 0] = 1
-        return L, dists
+        return -L, dists
 
     return build_graph
 

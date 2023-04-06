@@ -72,7 +72,6 @@ def update_plot(
     #         leader_labels[i].set_offsets(x[:2, i].T)
     #     else:
     #         leader_labels[i].set_alpha(0)
-
     for ndx, leader_label in enumerate(leader_labels):
         if ndx in group_manager.leaders:
             leader_label.set_alpha(1)
