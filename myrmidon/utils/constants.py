@@ -22,3 +22,6 @@ GRAPHS = [
     "Rigid Minimal",
     "Directed Cycle",
 ]
+
+WALL_SIZE = 3
+WALL_PROJECTION_DIST = 0.2

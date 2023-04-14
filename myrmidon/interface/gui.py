@@ -20,7 +20,7 @@ class GUI:
     ):
         self.root = root
         self.root.title("Myrmidon")
-        self.root.geometry("1200x600")
+        self.root.geometry("2560x1440")
 
         self.group_manager = group_manager
         self.robotarium_figure = robotarium_figure
@@ -31,12 +31,12 @@ class GUI:
         self.gui_override = False
 
         # Iniitialize for Robotarium
-        self.fig = Figure(figsize=(5, 5), dpi=100, facecolor="w")
+        print(self.robotarium_figure.set_size_inches((14, 12)))
+        self.fig = Figure(figsize=(10, 10), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
         if walls is not None:
             self.walls = walls
-            wall_size = 7
-            self.plot_walls(wall_size)
+            self.plot_walls(constants.WALL_SIZE)
         plt.close(robotarium_figure)
         self.selector = self.fig.canvas.mpl_connect(
             "button_press_event", self.mouse_click_func
@@ -49,37 +49,39 @@ class GUI:
         # Initialize Dropdown options
         self.formation_var = StringVar(self.root)
         self.formation_var.set("Rigid Minimal")
-
+        x_offset = 700
         # Display Buttons, Sliders
         button_unselect = Button(
             self.root, text="Unselect", command=self.root.destroy
-        ).place(x=900, y=30)
+        ).place(x=900 + x_offset, y=30)
 
         button_newleader = Button(
             self.root, text="New Leader", command=self.button_newleader, state=NORMAL
-        ).place(x=800, y=120)
+        ).place(x=800 + x_offset, y=120)
 
         button_join = Button(
             self.root, text="Join", command=self.button_join, state=NORMAL
-        ).place(x=1000, y=120)
+        ).place(x=1000 + x_offset, y=120)
 
         button_disband = Button(
             self.root, text="Disband Group", command=self.button_disband, state=NORMAL
-        ).place(x=800, y=210)
+        ).place(x=800 + x_offset, y=210)
 
         button_separate = Button(
             self.root, text="Separate", command=self.button_separate
-        ).place(x=1000, y=210)
+        ).place(x=1000 + x_offset, y=210)
 
         button_add = Button(self.root, text="+", width=3, command=self.add_robot).place(
-            x=960, y=300
+            x=960 + x_offset, y=300
         )
 
-        entry_curr_robot_count = Entry(self.root, width=5).place(x=867, y=300)
+        entry_curr_robot_count = Entry(self.root, width=5).place(
+            x=867 + x_offset, y=300
+        )
 
         button_remove = Button(
             self.root, text="-", width=3, command=self.remove_robot
-        ).place(x=925, y=300)
+        ).place(x=925 + x_offset, y=300)
 
         formation_options = [
             "",
@@ -94,7 +96,7 @@ class GUI:
             self.formation_var,
             *formation_options,
             command=self.formation_switch,
-        ).place(x=900, y=400)
+        ).place(x=900 + x_offset, y=400)
 
     # Define button functions
 
