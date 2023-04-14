@@ -15,7 +15,9 @@ from myrmidon.utils import constants
 
 class GUI:
     # TODO: See if keyboard is possible
-    def __init__(self, root, group_manager, robotarium_figure, agent_positions):
+    def __init__(
+        self, root, group_manager, robotarium_figure, agent_positions, walls=None
+    ):
         self.root = root
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
@@ -31,6 +33,10 @@ class GUI:
         # Iniitialize for Robotarium
         self.fig = Figure(figsize=(5, 5), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
+        if walls is not None:
+            self.walls = walls
+            wall_size = 7
+            self.plot_walls(wall_size)
         plt.close(robotarium_figure)
         self.selector = self.fig.canvas.mpl_connect(
             "button_press_event", self.mouse_click_func
@@ -197,6 +203,13 @@ class GUI:
 
     def update_gui_positions(self, positions):
         self.agent_positions = positions
+
+    def plot_walls(self, wall_size):
+        for wall in self.walls:
+            if wall.shape == (2, 2):
+                x = [wall[0][0], wall[1][0]]
+                y = [wall[0][1], wall[1][1]]
+                plt.plot(x, y, "k", linewidth=wall_size)
 
     @property
     def leader_pos(self):
