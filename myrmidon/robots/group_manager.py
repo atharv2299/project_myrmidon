@@ -179,8 +179,10 @@ class GroupManager:
         garage_controller,
         leader_position_controller,
         si_to_uni_dyn,
+        uni_to_si_dyn,
         uni_barrier_certs,
         desired_leader_position,
+        walls=None,
     ):
         """_summary_"""
 
@@ -214,7 +216,7 @@ class GroupManager:
             leader_dxu = leader_dxus.get(group_id, gui_leader_dxu)
             dxu_dict.update(
                 group.calculate_follower_dxus(
-                    agent_positions, leader_dxu, si_to_uni_dyn
+                    agent_positions, leader_dxu, si_to_uni_dyn, uni_to_si_dyn, walls
                 )
             )
 

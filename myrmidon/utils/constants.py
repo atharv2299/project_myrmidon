@@ -22,6 +22,10 @@ GRAPHS = [
     "Rigid Minimal",
     "Directed Cycle",
 ]
+
+WALL_SIZE = 3
+WALL_PROJECTION_DIST = 0.2
+
 import time
 
 LOG_LOCATION = "./logs/" + time.strftime("%Y%m%d-%H%M%S")
