@@ -22,3 +22,6 @@ GRAPHS = [
     "Rigid Minimal",
     "Directed Cycle",
 ]
+import time
+
+LOG_LOCATION = "./logs/" + time.strftime("%Y%m%d-%H%M%S")

@@ -1,14 +1,15 @@
-import logging
+# import logging
 
 import matplotlib
 import numpy as np
+import time
 
 matplotlib.use("TkAgg")
 import threading
 from functools import partial
 from tkinter import *
 from tkinter.ttk import *
-
+from myrmidon.utils.misc import setup_logger
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
@@ -19,8 +20,9 @@ from myrmidon.utils import constants
 class GUI:
     # TODO: See if keyboard is possible
     def __init__(self, root, group_manager, robotarium_figure, agent_positions):
-        self.logger = logging.getLogger("myrmidon-GUI")
-        self.logger.info("Starting GUI")
+        self.logger = setup_logger(
+            "clicked_event", constants.LOG_LOCATION + "_user-activity.log"
+        )
         self.root = root
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")
@@ -29,7 +31,7 @@ class GUI:
         self.robotarium_figure = robotarium_figure
 
         self.leader_pos_dict = {}
-        self._controlled_group_ndx = 0
+        self._controlled_group_ndx = 1
         self.agent_positions = agent_positions
         self.gui_override = False
 
@@ -58,9 +60,9 @@ class GUI:
             self.root, text="New Leader", command=self.button_newleader, state=NORMAL
         ).place(x=800, y=120)
 
-        button_join = Button(
-            self.root, text="Join", command=self.button_join, state=NORMAL
-        ).place(x=1000, y=120)
+        # button_join = Button(
+        #     self.root, text="Join", command=self.button_join, state=NORMAL
+        # ).place(x=1000, y=120)
 
         button_disband = Button(
             self.root, text="Disband Group", command=self.button_disband, state=NORMAL
@@ -97,42 +99,52 @@ class GUI:
 
     # Define button functions
 
-    def button_join(self):
-        # TODO: Implement combining
-        print("IMPLEMENT COMBINING!!!")
-        self.group_manager.start_barriers = not self.group_manager.start_barriers
-        # group_manager.combine(
-        #     main_group_id=self.controlled_group_id,
-        #     other_group_id=selected_groups[-1]
-        # )
+    # def button_join(self):
+    #     # TODO: Implement combining
+    #     print("IMPLEMENT COMBINING!!!")
+    #     self.group_manager.start_barriers = not self.group_manager.start_barriers
+    #     # group_manager.combine(
+    #     #     main_group_id=self.controlled_group_id,
+    #     #     other_group_id=selected_groups[-1]
+    #     # )
+
+    def on_click(self, x, y, button, pressed):
+        if pressed:
+            self.logger.info(f"clicked {button}")
 
     def button_separate(self):
         print("Splitting group!")
+        self.logger.info("clicked group split")
         self.group_manager.split(group_id=self.controlled_group_id, num_groups=2)
 
     def button_newleader(self):
         print("Creating New Leader!")
+        self.logger.info("clicked new leader")
         group_id = self.group_manager.create()
         self.group_manager.add_to_group(group_id)
 
     def button_disband(self):
         print("Disbanding group!")
+        self.logger.info("clicked group disband")
         self.group_manager.disband(group_id=self.controlled_group_id)
 
         # self.group_manager.clear_select()
 
     def add_robot(self):
         print("Adding Robot to group!")
+        self.logger.info("clicked add robot")
         self.group_manager.add_to_group(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
 
     def remove_robot(self):
         print("Removing Robot from group!")
+        self.logger.info("clicked remove robot")
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
         # self.group_manager.clear_select()
 
     def formation_switch(self, graph):
         print(graph)
+        self.logger.info(f"clicked change graph to {graph}")
         # selected = self.formation_var.get()
         # self.utils.graph.
         self.group_manager.change_group_graph(
@@ -147,6 +159,7 @@ class GUI:
         self._controlled_group_ndx = (self._controlled_group_ndx + 1) % (
             len(self.group_ids)
         )
+        self.logger.info(f"controlled group id: {self.controlled_group_id}")
 
     def mouse_click_func(self, event):
         # print(event.button)
@@ -161,12 +174,18 @@ class GUI:
                 self._controlled_group_ndx = (
                     self._controlled_group_ndx if ndx is None else ndx
                 )
+                self.logger.info(f"controlled group id: {self.controlled_group_id}")
+
         # Right Click:
         if event.button == 3:
             print(f"Going to: {pos}")
             leader_position = self.group_leader_position(self.controlled_group_id)
             if leader_position is not None:
                 self.leader_pos_dict.update({self.controlled_group_id: pos})
+                self.logger.info(
+                    f"Moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
+                )
+
             self.gui_override = True
 
         # Middle Click:

@@ -94,6 +94,8 @@ class GroupManager:
         Args:
             group_id (_type_): _description_
         """
+        if group_id not in self.groups:
+            return
         group = self.groups[group_id]
         while group.agents:
             self.remove_from_group(group_id=group_id)
@@ -125,6 +127,8 @@ class GroupManager:
             group_id (_type_): _description_
             num_groups (_type_): _description_
         """
+        if group_id not in self.groups:
+            return
         group = self.groups[group_id]
         # TODO: Check this works
         # split_groups = np.array_split(group.agents, num_groups)
