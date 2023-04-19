@@ -1,9 +1,14 @@
 import numpy as np
 from pynput import keyboard
+from myrmidon.utils.misc import setup_logger
+from myrmidon.utils import constants
 
 
 class TUI:
     def __init__(self, group_manager, allow_multi_leader_movement=False) -> None:
+        self.logger = setup_logger(
+            "click_tracking", constants.LOG_LOCATION + "_user-activity.log"
+        )
         self.v = 0
         self.w = 0
         self.group_manager = group_manager
@@ -14,6 +19,9 @@ class TUI:
 
     def on_press(self, key):
         self.key_function(key)
+
+    # def on_click(self, x, y, button, pressed):
+    #     self.logger.info(f"Clicked: {x},{y}")
 
     def key_function(self, pressed_key):
         is_bot_count_updated = False

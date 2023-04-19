@@ -25,31 +25,19 @@ robot_position_logger = setup_logger(
 )
 initial_conditions = np.array(
     [
-        [-9, -9, -9, -9, -9, -8, -8, -8, -8, -8],
+        [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],
         [0.8, 0.4, 0, -0.4, -0.8, 0.8, 0.4, 0, -0.4, -0.8],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, np.pi, np.pi, np.pi, np.pi, np.pi],
     ]
 )
 
 _garage = np.array(
     [
-        [-9, -9, -9, -9, -9, -8, -8, -8, -8, -8],
+        [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],
         [0.8, 0.4, 0, -0.4, -0.8, 0.8, 0.4, 0, -0.4, -0.8],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, np.pi, np.pi, np.pi, np.pi, np.pi],
     ]
 )
-
-# To index: walls[wall_num][endpoint][axis]
-walls = np.array(
-    [
-        [[-7.0, 10], [-7.0, 3]],
-        [[0, 10], [0, 3]],
-        [[5, 1], [8, 1]],
-        [[2, -10], [2, -3]],
-        [[-3.5, -10], [-3.5, -3]],
-    ]
-)
-
 garage_return_controller = create_hybrid_unicycle_pose_controller()
 # leader_controller = create_hybrid_unicycle_pose_controller()
 leader_controller = create_clf_unicycle_position_controller()
@@ -59,8 +47,7 @@ leader_controller = create_clf_unicycle_position_controller()
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
     linear_velocity_gain=0.75, angular_velocity_limit=np.pi
 )
-si_to_uni_dyn, uni_to_si_states = create_si_to_uni_mapping()
-uni_to_si_dyn = create_uni_to_si_dynamics()
+_, uni_to_si_states = create_si_to_uni_mapping()
 
 r = robotarium.Robotarium(
     number_of_robots=_N,
@@ -75,7 +62,7 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
 tui = TUI(group_manager, True)
-gui = GUI(root, group_manager, r.figure, x, walls)
+gui = GUI(root, group_manager, r.figure, x)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )
@@ -85,9 +72,9 @@ uni_barrier_certs = utils.custom_uni_barriers(
     group_manager=group_manager,
     connectivity_distance=0.7,
     barrier_gain=100,
-    magnitude_limit=1,
-    boundary_points=[-10, 10, -10, 10],
+    magnitude_limit=0.2,
 )
+
 
 listener = keyboard.Listener(on_press=tui.on_press, suppress=False)
 listener.start()
@@ -110,11 +97,10 @@ while not tui.exit:
         garage_return_controller,
         leader_controller,
         si_to_uni_dyn,
-        uni_to_si_dyn,
         uni_barrier_certs,
         gui.leader_pos,
-        walls,
     )
+
     gui.update_gui()
     r.set_velocities(np.arange(_N), dxu)
 
