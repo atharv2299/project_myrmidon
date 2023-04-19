@@ -15,7 +15,7 @@ from myrmidon.robots import GroupManager
 
 plt.rcParams["keymap.save"].remove("s")
 _N = 10
-logname = time.strftime("%Y%m%d-%H%M%S") + "_myrmidon.log"
+logname = "./logs/" + time.strftime("%Y%m%d-%H%M%S") + "_myrmidon.log"
 logging.basicConfig(
     filename=logname,
     filemode="a",
