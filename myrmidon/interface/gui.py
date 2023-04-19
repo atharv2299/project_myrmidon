@@ -1,3 +1,5 @@
+import logging
+
 import matplotlib
 import numpy as np
 
@@ -10,12 +12,15 @@ from tkinter.ttk import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
+
 from myrmidon.utils import constants
 
 
 class GUI:
     # TODO: See if keyboard is possible
     def __init__(self, root, group_manager, robotarium_figure, agent_positions):
+        self.logger = logging.getLogger("myrmidon-GUI")
+        self.logger.info("Starting GUI")
         self.root = root
         self.root.title("Myrmidon")
         self.root.geometry("1200x600")

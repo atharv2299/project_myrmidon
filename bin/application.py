@@ -1,3 +1,5 @@
+import logging
+import time
 from tkinter import Tk
 
 import matplotlib.pyplot as plt
@@ -13,7 +15,17 @@ from myrmidon.robots import GroupManager
 
 plt.rcParams["keymap.save"].remove("s")
 _N = 10
+logname = time.strftime("%Y%m%d-%H%M%S") + "_myrmidon.log"
+logging.basicConfig(
+    filename=logname,
+    filemode="a",
+    format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.INFO,
+)
 
+logger = logging.getLogger("application")
+logger.info("TESTING")
 initial_conditions = np.array(
     [
         [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],
