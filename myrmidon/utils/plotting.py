@@ -108,7 +108,8 @@ def get_color(agent_num, group_manager):
     print(f"{agent_num} is not in a group")
 
 
-def plot_assembly_area(x, y, w, h, ax):
+def plot_assembly_area(ax):
+    x, y, w, h = utils.constants.ASSEMBLY_AREA
     assembly_area = plt.Rectangle(
         (x, y), w, h, edgecolor="k", facecolor="g", alpha=0.2, zorder=0
     )

@@ -29,3 +29,5 @@ WALL_PROJECTION_DIST = 0.4
 import time
 
 LOG_LOCATION = "./logs/" + time.strftime("%Y%m%d-%H%M%S")
+
+ASSEMBLY_AREA = (-10, -1, 4, 2)

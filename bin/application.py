@@ -52,7 +52,7 @@ walls = np.array(
 
 garage_return_controller = create_hybrid_unicycle_pose_controller()
 # leader_controller = create_hybrid_unicycle_pose_controller()
-leader_controller = create_clf_unicycle_position_controller()
+leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=0.6)
 
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
     linear_velocity_gain=0.75, angular_velocity_limit=np.pi

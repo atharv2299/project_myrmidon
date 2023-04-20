@@ -217,3 +217,8 @@ def setup_logger(name, log_file, level=logging.INFO, formatter=default_format):
     logger.addHandler(handler)
 
     return logger
+
+
+def in_area(area, agent_pose):
+    x, y, w, h = area
+    return (x <= agent_pose[0] <= x + w) and (y <= agent_pose[1] <= y + h)

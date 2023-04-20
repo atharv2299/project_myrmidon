@@ -9,13 +9,24 @@ import threading
 from functools import partial
 from tkinter import *
 from tkinter.ttk import *
-from myrmidon.utils.misc import setup_logger
+from myrmidon.utils.misc import setup_logger, in_area
 from myrmidon.utils.plotting import plot_walls, plot_assembly_area, create_goal_patch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
 from myrmidon.utils import constants
+
+
+def allow_operation(func):
+    def wrapper(self, *args, **kwargs):
+        leader_pose = self.group_leader_position(self.controlled_group_id)
+        allow = in_area(constants.ASSEMBLY_AREA, leader_pose)
+        if allow:
+            func(self, *args, **kwargs)
+        return
+
+    return wrapper
 
 
 class GUI:
@@ -42,7 +53,7 @@ class GUI:
         if walls is not None:
             plot_walls(walls, constants.WALL_SIZE)
 
-        plot_assembly_area(-10, -1, 4, 2, self.fig.gca())
+        plot_assembly_area(self.fig.gca())
         thing = create_goal_patch(self.fig.gca())
         plt.close(robotarium_figure)
         self.selector = self.fig.canvas.mpl_connect(
@@ -120,6 +131,7 @@ class GUI:
         if pressed:
             self.logger.info(f"clicked {button}")
 
+    @allow_operation
     def button_separate(self):
         print("Splitting group!")
         self.logger.info("action: group split")
@@ -136,6 +148,7 @@ class GUI:
         self.logger.info("action: group disband")
         self.group_manager.disband(group_id=self.controlled_group_id)
 
+    @allow_operation
     def add_robot(self):
         print("Adding Robot to group!")
         self.logger.info("action: add robot")
@@ -164,38 +177,47 @@ class GUI:
         pos = np.array([[event.xdata], [event.ydata]])
         # Left Click:
         if event.button == 1:
-            if self.group_manager.leaders.size > 0:
-                ndx = self.group_manager.closest_leader_to_point(
-                    agent_positions=self.agent_positions, pt=pos
-                )
-                self._controlled_group_ndx = (
-                    self._controlled_group_ndx if ndx is None else ndx
-                )
-                self.logger.info(f"controlled group id: {self.controlled_group_id}")
+            self.select_leader(pos)
 
         # Right Click:
         if event.button == 3:
-            print(f"Going to: {pos}")
-            leader_position = self.group_leader_position(self.controlled_group_id)
-            if leader_position is not None:
-                self.leader_pos_dict.update({self.controlled_group_id: pos})
-                self.logger.info(
-                    f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
-                )
-
-            self.gui_override = True
-
+            self.drive_to_point(pos)
         # Middle Click:
         if event.button == 2:
-            if (
-                self.group_manager.leaders.size > 0
-                and len(self.group_manager.groups) >= 2
-            ):
-                ndx = self.group_manager.closest_leader_to_point(
-                    agent_positions=self.agent_positions, pt=pos
-                )
+            self.join_groups(pos)
 
-                if ndx is not None and ndx != self._controlled_group_ndx:
+    def select_leader(self, pos):
+        if self.group_manager.leaders.size > 0:
+            ndx = self.group_manager.closest_leader_to_point(
+                agent_positions=self.agent_positions, pt=pos
+            )
+            self._controlled_group_ndx = (
+                self._controlled_group_ndx if ndx is None else ndx
+            )
+            self.logger.info(f"controlled group id: {self.controlled_group_id}")
+
+    def drive_to_point(self, pos):
+        print(f"Going to: {pos}")
+        leader_position = self.group_leader_position(self.controlled_group_id)
+        if leader_position is not None:
+            self.leader_pos_dict.update({self.controlled_group_id: pos})
+            self.logger.info(
+                f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
+            )
+        self.gui_override = True
+
+    @allow_operation
+    def join_groups(self, pos):
+        if self.group_manager.leaders.size > 0 and len(self.group_manager.groups) >= 2:
+            ndx = self.group_manager.closest_leader_to_point(
+                agent_positions=self.agent_positions, pt=pos
+            )
+
+            if ndx is not None and ndx != self._controlled_group_ndx:
+                other_group_id = self.group_ids[ndx]
+                group_leader_pose = self.group_leader_position(other_group_id)
+                allow = in_area(constants.ASSEMBLY_AREA, group_leader_pose)
+                if allow:
                     self.group_manager.combine(
                         main_group_id=self.controlled_group_id,
                         other_group_id=self.group_ids[ndx],
