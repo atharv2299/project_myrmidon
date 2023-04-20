@@ -100,9 +100,10 @@ class Group:
                     * (poses[:2, [neighbor]] - poses[:2, [agent_id]])
                 )
                 # TODO: Finish implementation
-                dxs[:, [ndx]] = self.wall_avoidance(
-                    walls, poses, agent_id, dxs[:, [ndx]]
-                )
+                if walls is not None:
+                    dxs[:, [ndx]] = self.wall_avoidance(
+                        walls, poses, agent_id, dxs[:, [ndx]]
+                    )
                 dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], poses[:, [agent_id]])
         dxu[self.agents[0]] = leader_dxu
         return dxu
@@ -145,34 +146,30 @@ class Group:
             ]
         ).reshape(2, 2)
 
-        if walls is not None:
+        for wall in walls:
+            # wall_vector = (wall[0] - wall[1]).reshape((2,))
+            # agent_vector = (pose.reshape(wall[1].shape) - wall[1]).reshape((2,))
 
-            for wall in walls:
-                # TODO: Add a stop if close to the wall
+            # if np.dot(wall_vector, agent_vector) > 0:
+            #     theta = np.arccos(
+            #         np.dot(
+            #             wall_vector / np.linalg.norm(wall_vector),
+            #             agent_vector / np.linalg.norm(agent_vector),
+            #         )
+            #     )
+            #     dist = np.linalg.norm(agent_vector) * np.sin(theta)
+            #     if dist <= constants.WALL_PROJECTION_DIST / 2:
+            #         too_close = True
 
-                wall_vector = (wall[0] - wall[1]).reshape((2,))
-                agent_vector = (pose.reshape(wall[1].shape) - wall[1]).reshape((2,))
-
-                if np.dot(wall_vector, agent_vector) > 0:
-                    theta = np.arccos(
-                        np.dot(
-                            wall_vector / np.linalg.norm(wall_vector),
-                            agent_vector / np.linalg.norm(agent_vector),
-                        )
-                    )
-                    dist = np.linalg.norm(agent_vector) * np.sin(theta)
-                    if dist <= constants.WALL_PROJECTION_DIST / 2:
-                        too_close = True
-
-                M = np.array([line[1] - line[0], wall[0] - wall[1]]).T
-                singular = np.linalg.det(M) == 0
-                if not singular:
-                    t, s = np.linalg.solve(M, wall[0] - line[0])
-                    if (0 <= t <= 1) and (0 <= s <= 1):
-                        new_dxs = np.zeros((2, 1))
-                        if too_close:
-                            new_dxs = -norm_dxs / 10
-                        return new_dxs
+            M = np.array([line[1] - line[0], wall[0] - wall[1]]).T
+            singular = np.linalg.det(M) == 0
+            if not singular:
+                t, s = np.linalg.solve(M, wall[0] - line[0])
+                if (0 <= t <= 1) and (0 <= s <= 1):
+                    new_dxs = np.zeros((2, 1))
+                    # if too_close:
+                    #     new_dxs = -norm_dxs / 10
+                    return new_dxs
         return dxs
 
     @update_laplacian
