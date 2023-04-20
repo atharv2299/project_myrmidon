@@ -9,9 +9,6 @@ def complete_GL_leaderless(num_bots):
         follower_dists = -followers
         return followers, follower_dists
     followers = num_bots * np.identity(num_bots) - np.ones((num_bots, num_bots))
-    # Dists:
-    # where k is the distance apart
-    # sin(k*np.pi/num_bots)/sin(np.pi/num_bots)
     follower_dists = np.zeros((num_bots, num_bots))
     for k in range(num_bots):
         offset = k
@@ -89,7 +86,6 @@ def _rigid_minimal_GL_leaderless(num_bots):
         follower_dists = -followers
         return followers, follower_dists
     rigid_connects = np.resize([1, 0], (num_bots - 2,))
-    # * (1 / np.cos(np.pi /  num_bots))
     adjustment = 2 * np.cos(np.pi / num_bots)
     rigid_adjusted = (
         -(np.diag(rigid_connects, 2) + np.diag(rigid_connects, -2)) * adjustment

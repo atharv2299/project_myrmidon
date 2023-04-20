@@ -24,7 +24,7 @@ GRAPHS = [
 ]
 
 WALL_SIZE = 3
-WALL_PROJECTION_DIST = 0.2
+WALL_PROJECTION_DIST = 0.4
 
 import time
 

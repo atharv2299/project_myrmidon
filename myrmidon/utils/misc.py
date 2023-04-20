@@ -4,9 +4,8 @@ import threading
 import time
 
 import numpy as np
-from cvxopt import matrix, sparse
-from cvxopt.blas import dot
-from cvxopt.solvers import options, qp
+from cvxopt import matrix
+from cvxopt.solvers import qp
 from rps.utilities.transformations import *
 from scipy.special import comb
 
@@ -60,7 +59,6 @@ def lock(func):
     return wrapper
 
 
-# TODO: Add custom barrier functions here:
 def custom_uni_barriers(
     barrier_gain=100,
     safety_radius=0.12,
@@ -122,7 +120,6 @@ def si_barrier_with_connectivity_and_boundary(
                 A[count, (2 * i, (2 * i + 1))] = -2 * error
                 A[count, (2 * j, (2 * j + 1))] = 2 * error
                 b[count] = barrier_gain * np.power(h, 3)
-                # print(f"B: {b[count]}")
 
                 count += 1
 
@@ -163,23 +160,6 @@ def si_barrier_with_connectivity_and_boundary(
             )
             count += 1
 
-        # TODO: Show Sean: Activate these with the Join button
-        if group_manager.start_barriers:
-            print("Starting additional Barriers!")
-            for i in range(N - 1):
-                for j in range(i + 1, N):
-                    error = x[:, i] - x[:, j]
-                    h = (error[0] * error[0] + error[1] * error[1]) - np.power(0.3, 2)
-
-                    derivative = np.zeros((1, 2 * N))
-                    derivative[0, (2 * i, (2 * i + 1))] = -2 * error
-                    derivative[0, (2 * j, (2 * j + 1))] = 2 * error
-                    A = np.vstack((A, derivative))
-                    b = np.hstack((b, 1000000 * barrier_gain * np.power(h, 3)))
-                    if b[count] < 0:
-                        print(f"B: {b[count]}")
-                    count += 1
-
         if (
             connectivity_distance
             and group_manager
@@ -188,36 +168,25 @@ def si_barrier_with_connectivity_and_boundary(
 
             for agent_ndx in group_manager.leaders:
                 L = group_manager.block_L.copy()
-                # if agent_ndx in group_manager.leaders:
                 neighbors = topological_neighbors(L, agent_ndx)
                 for neighbor_ndx in neighbors:
                     error = x[:, agent_ndx] - x[:, neighbor_ndx]
-                    # error = -error
                     h = np.power(connectivity_distance, 2) - (
                         error[0] * error[0] + error[1] * error[1]
                     )
 
-                    # print(connectivity_distance)
                     derivative = np.zeros((1, 2 * N))
                     derivative[0, (2 * agent_ndx, (2 * agent_ndx + 1))] = 2 * error
                     derivative[0, (2 * neighbor_ndx, (2 * neighbor_ndx + 1))] = (
                         -2 * error
                     )
-                    # Normal barriers break
-                    # h = -h
-                    # derivative = -derivative
-                    # b = np.hstack((b, 10 * barrier_gain * np.power(h, 3)))
 
                     A = np.vstack((A, derivative))
-                    # print(b.shape)
                     alpha = np.power(h, 3)
                     connectivity_barrier_gain = barrier_gain
                     class_k = connectivity_barrier_gain * alpha
                     class_k = max(connectivity_barrier_gain * alpha, -2)
                     b = np.hstack((b, class_k))
-                    # print(b.shape)
-                    # print(f"I: {b[count]}")
-                    # print(A[count] == derivative)
                     count += 1
         # Threshold control inputs before QP
         norms = np.linalg.norm(dxi, 2, 0)
@@ -227,9 +196,7 @@ def si_barrier_with_connectivity_and_boundary(
         f = -2 * np.reshape(dxi, (2 * N, 1), order="F")
         b = np.reshape(b, (-1, 1), order="F")
         solved_qp = qp(matrix(H), matrix(f), matrix(A), matrix(b))
-        # print(solved_qp)
         result = solved_qp["x"]
-        # result = solver2.solve_qp(H, f, A, b, 0)[0]
 
         return np.reshape(result, (2, N), order="F")
 

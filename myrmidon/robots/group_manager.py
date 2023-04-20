@@ -17,7 +17,6 @@ def update_laplacian(func):
     return wrapper
 
 
-# TODO: Threading
 class GroupManager:
     """_summary_"""
 
@@ -60,7 +59,6 @@ class GroupManager:
         self.num_agents = sum(
             [len(group.agents) for group in self.groups.values()]
         ) + len(self.garage.agents)
-        self.start_barriers = False
 
     # @update_laplacian
     def create(self, split=False):
@@ -71,7 +69,6 @@ class GroupManager:
 
         def generate_id():
             ndx = -1
-            # TODO: Look if there's a better way to do this:
             for key, ndx in zip(list(self.groups.keys()), range(len(self.groups))):
                 if key != ndx and ndx not in list(self.groups.keys()):
                     return ndx
@@ -224,7 +221,6 @@ class GroupManager:
         for agent_id in sorted(dxu_dict):
             dxu[:, [agent_id]] = dxu_dict[agent_id]
 
-        # TODO: Custom barrier function, pass in leaders and laplacian
         dxu = uni_barrier_certs(dxu, agent_positions)
         return dxu
 

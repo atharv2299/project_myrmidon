@@ -20,9 +20,6 @@ class TUI:
     def on_press(self, key):
         self.key_function(key)
 
-    # def on_click(self, x, y, button, pressed):
-    #     self.logger.info(f"Clicked: {x},{y}")
-
     def key_function(self, pressed_key):
         is_bot_count_updated = False
         angular_increment = 0.1
@@ -90,9 +87,6 @@ class TUI:
 
             elif pressed_key.char == "t":
                 if len(self.group_manager.groups) >= 2:
-                    # if self._controlled_group_ndx == self.group_ids[-1]:
-                    #     self._controlled_group_ndx = self.group_ids[0]
-
                     self.group_manager.combine(
                         self.group_ids[0],
                         self.group_ids[-1],
@@ -100,7 +94,6 @@ class TUI:
             elif pressed_key.char == "y":
                 self.group_manager.disband(self.controlled_group_id)
 
-            # TODO: Check this
             # Find the next possible controllable group if the current group has been invalidated.
             if len(self.group_ids):
                 while self.controlled_group is None:

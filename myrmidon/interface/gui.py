@@ -10,6 +10,7 @@ from functools import partial
 from tkinter import *
 from tkinter.ttk import *
 from myrmidon.utils.misc import setup_logger
+from myrmidon.utils.plotting import plot_walls, plot_assembly_area, create_goal_patch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
@@ -18,8 +19,7 @@ from myrmidon.utils import constants
 
 
 class GUI:
-    # TODO: See if keyboard is possible
-    def __init__(self, root, group_manager, robotarium_figure, agent_positions):
+    def __init__(self, root, group_manager, robotarium_figure, agent_positions, walls):
         self.logger = setup_logger(
             "clicked_event", constants.LOG_LOCATION + "_user-activity.log"
         )
@@ -36,12 +36,14 @@ class GUI:
         self.gui_override = False
 
         # Iniitialize for Robotarium
-        print(self.robotarium_figure.set_size_inches((14, 12)))
+        print(self.robotarium_figure.set_size_inches((12, 12)))
         self.fig = Figure(figsize=(10, 10), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
         if walls is not None:
-            self.walls = walls
-            self.plot_walls(constants.WALL_SIZE)
+            plot_walls(walls, constants.WALL_SIZE)
+
+        plot_assembly_area(-10, -1, 4, 2, self.fig.gca())
+        thing = create_goal_patch(self.fig.gca())
         plt.close(robotarium_figure)
         self.selector = self.fig.canvas.mpl_connect(
             "button_press_event", self.mouse_click_func
@@ -120,46 +122,36 @@ class GUI:
 
     def button_separate(self):
         print("Splitting group!")
-        self.logger.info("clicked group split")
+        self.logger.info("action: group split")
         self.group_manager.split(group_id=self.controlled_group_id, num_groups=2)
 
     def button_newleader(self):
         print("Creating New Leader!")
-        self.logger.info("clicked new leader")
+        self.logger.info("action: new leader")
         group_id = self.group_manager.create()
         self.group_manager.add_to_group(group_id)
 
     def button_disband(self):
         print("Disbanding group!")
-        self.logger.info("clicked group disband")
+        self.logger.info("action: group disband")
         self.group_manager.disband(group_id=self.controlled_group_id)
-
-        # self.group_manager.clear_select()
 
     def add_robot(self):
         print("Adding Robot to group!")
-        self.logger.info("clicked add robot")
+        self.logger.info("action: add robot")
         self.group_manager.add_to_group(group_id=self.controlled_group_id)
-        # self.group_manager.clear_select()
 
     def remove_robot(self):
         print("Removing Robot from group!")
-        self.logger.info("clicked remove robot")
+        self.logger.info("action: remove robot")
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
-        # self.group_manager.clear_select()
 
     def formation_switch(self, graph):
         print(graph)
         self.logger.info(f"clicked change graph to {graph}")
-        # selected = self.formation_var.get()
-        # self.utils.graph.
         self.group_manager.change_group_graph(
             group_id=self.controlled_group_id, graph=graph
         )
-        # print(selected)
-        # pass
-        # Add logic to relate string of dropdown menu to function calls from graph
-        # If selected == 'Standard': complete_gl(num_bots)
 
     def next_controlled_group(self):
         self._controlled_group_ndx = (self._controlled_group_ndx + 1) % (
@@ -168,8 +160,7 @@ class GUI:
         self.logger.info(f"controlled group id: {self.controlled_group_id}")
 
     def mouse_click_func(self, event):
-        # print(event.button)
-        # print(int(event.button))
+
         pos = np.array([[event.xdata], [event.ydata]])
         # Left Click:
         if event.button == 1:
@@ -189,7 +180,7 @@ class GUI:
             if leader_position is not None:
                 self.leader_pos_dict.update({self.controlled_group_id: pos})
                 self.logger.info(
-                    f"Moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
+                    f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
                 )
 
             self.gui_override = True
@@ -227,13 +218,6 @@ class GUI:
 
     def update_gui_positions(self, positions):
         self.agent_positions = positions
-
-    def plot_walls(self, wall_size):
-        for wall in self.walls:
-            if wall.shape == (2, 2):
-                x = [wall[0][0], wall[1][0]]
-                y = [wall[0][1], wall[1][1]]
-                plt.plot(x, y, "k", linewidth=wall_size)
 
     @property
     def leader_pos(self):

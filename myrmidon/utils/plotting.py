@@ -1,6 +1,8 @@
 from rps.utilities.misc import determine_marker_size
 from myrmidon import utils
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 
 def initialize_plot(r, x, num_agents):
@@ -8,7 +10,6 @@ def initialize_plot(r, x, num_agents):
 
     # INITIAL PLOTTING:
     init_L = num_agents * np.identity(num_agents) - np.ones((num_agents, num_agents))
-    # completeGL(_N)
     [rows, cols] = np.where(init_L == -1)
     line_follower = [
         r.axes.plot(
@@ -48,7 +49,6 @@ def update_plot(
     tui_controlled_group,
     gui_controlled_group,
 ):
-    # TODO: Update plotting for GUI and TUI
     if not group_manager.groups:
         for leader_label in leader_labels:
             leader_label.set_alpha(0)
@@ -59,19 +59,9 @@ def update_plot(
     rows, cols = utils.find_connections(group_manager.block_L)
     num_bots = group_manager.num_agents
 
-    # for i in range(len(line_follower)):
-    #     line_follower[i][0].set_alpha(0)
-
     for line in line_follower:
         line[0].set_alpha(0)
 
-    # TODO: Highlight controlled formation - get from UI
-    # for i in range(len(leader_labels)):
-    #     if i == tui_controlled_group.agents[0]:
-    #         leader_labels[i].set_alpha(1)
-    #         leader_labels[i].set_offsets(x[:2, i].T)
-    #     else:
-    #         leader_labels[i].set_alpha(0)
     for ndx, leader_label in enumerate(leader_labels):
         if ndx in group_manager.leaders:
             leader_label.set_alpha(1)
@@ -116,3 +106,28 @@ def get_color(agent_num, group_manager):
         if agent_num in group.agents:
             return utils.constants.COLORS[key % len(utils.constants.COLORS)]
     print(f"{agent_num} is not in a group")
+
+
+def plot_assembly_area(x, y, w, h, ax):
+    assembly_area = plt.Rectangle(
+        (x, y), w, h, edgecolor="k", facecolor="g", alpha=0.2, zorder=0
+    )
+    ax.add_patch(assembly_area)
+
+
+def create_goal_patch(ax):
+    goal_patch = plt.Circle((0, 0), 1, alpha=1, edgecolor="k", facecolor="r")
+    ax.add_patch(goal_patch)
+    return goal_patch
+
+
+def plot_walls(walls, wall_size, color="k"):
+    for wall in walls:
+        if wall.shape == (2, 2):
+            x = [wall[0][0], wall[1][0]]
+            y = [wall[0][1], wall[1][1]]
+            plt.plot(x, y, color, linewidth=wall_size)
+
+
+def adjust_patch(patch):
+    pass

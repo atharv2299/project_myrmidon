@@ -53,9 +53,7 @@ walls = np.array(
 garage_return_controller = create_hybrid_unicycle_pose_controller()
 # leader_controller = create_hybrid_unicycle_pose_controller()
 leader_controller = create_clf_unicycle_position_controller()
-# uni_barrier_certs = create_unicycle_barrier_certificate_with_boundary(
-#     safety_radius=0.12, projection_distance=0.04
-# )
+
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
     linear_velocity_gain=0.75, angular_velocity_limit=np.pi
 )
@@ -69,7 +67,6 @@ r = robotarium.Robotarium(
     initial_conditions=initial_conditions,
 )
 x = r.get_poses()
-# robot_position_logger.info("Poses: [{}]".format(",".join(map(str, x.flatten()))))
 
 r.step()
 root = Tk()
@@ -119,7 +116,6 @@ while not tui.exit:
     r.set_velocities(np.arange(_N), dxu)
 
     x = r.get_poses()
-    # robot_position_logger.info("{}".format(",".join(map(str, x.flatten()))))
 
     gui.update_gui_positions(x)
 
@@ -131,14 +127,6 @@ while not tui.exit:
         tui.controlled_group,
         gui.controlled_group,
     )
-    # leader_labels2, line_follower2 = utils.plotting.update_plot(
-    #     group_manager,
-    #     line_follower2,
-    #     leader_labels2,
-    #     x,
-    #     tui.controlled_group,
-    #     gui.controlled_group,
-    # )
     r.step()
 root.destroy()
 root.mainloop()
