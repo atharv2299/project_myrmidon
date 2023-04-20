@@ -220,7 +220,10 @@ class GUI:
                 if allow:
                     self.group_manager.combine(
                         main_group_id=self.controlled_group_id,
-                        other_group_id=self.group_ids[ndx],
+                        other_group_id=other_group_id,
+                    )
+                    self.logger.info(
+                        f"action: Combined group {other_group_id} into {self.controlled_group_id}"
                     )
 
     def group_leader_position(self, group_id):
