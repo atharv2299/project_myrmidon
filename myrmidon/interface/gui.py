@@ -10,7 +10,6 @@ from functools import partial
 from tkinter import *
 from tkinter.ttk import *
 from myrmidon.utils.misc import setup_logger, in_area
-from myrmidon.utils.plotting import plot_walls, plot_assembly_area, create_goal_patch
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
@@ -50,11 +49,6 @@ class GUI:
         print(self.robotarium_figure.set_size_inches((12, 12)))
         self.fig = Figure(figsize=(10, 10), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
-        if walls is not None:
-            plot_walls(walls, constants.WALL_SIZE)
-
-        plot_assembly_area(self.fig.gca())
-        thing = create_goal_patch(self.fig.gca())
         plt.close(robotarium_figure)
         self.selector = self.fig.canvas.mpl_connect(
             "button_press_event", self.mouse_click_func

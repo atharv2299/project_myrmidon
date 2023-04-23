@@ -211,11 +211,10 @@ class GroupManager:
             else:
                 gui_leader_dxu = np.array([[0], [0]])
             leader_dxu = leader_dxus.get(group_id, gui_leader_dxu)
-            dxu_dict.update(
-                group.calculate_follower_dxus(
-                    agent_positions, leader_dxu, si_to_uni_dyn, uni_to_si_dyn, walls
-                )
+            group_dxu = group.calculate_follower_dxus(
+                agent_positions, leader_dxu, si_to_uni_dyn, uni_to_si_dyn, walls
             )
+            dxu_dict.update(group_dxu)
 
         dxu = np.zeros((2, self.num_agents))
         for agent_id in sorted(dxu_dict):

@@ -13,6 +13,7 @@ from myrmidon import utils
 from myrmidon.interface import GUI, TUI
 from myrmidon.robots import GroupManager
 from myrmidon.utils.misc import setup_logger
+from myrmidon.utils.plotting import create_goal_patch, plot_assembly_area, plot_walls
 
 plt.rcParams["keymap.save"].remove("s")
 _N = 10
@@ -50,14 +51,16 @@ walls = np.array(
     ]
 )
 
-garage_return_controller = create_hybrid_unicycle_pose_controller()
+garage_return_controller = create_hybrid_unicycle_pose_controller(
+    linear_velocity_gain=5
+)
 # leader_controller = create_hybrid_unicycle_pose_controller()
 leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=0.6)
 
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
-    linear_velocity_gain=0.75, angular_velocity_limit=np.pi
+    linear_velocity_gain=0.6, angular_velocity_limit=np.pi
 )
-si_to_uni_dyn, uni_to_si_states = create_si_to_uni_mapping()
+_, uni_to_si_states = create_si_to_uni_mapping()
 uni_to_si_dyn = create_uni_to_si_dynamics()
 
 r = robotarium.Robotarium(
@@ -66,6 +69,11 @@ r = robotarium.Robotarium(
     sim_in_real_time=False,
     initial_conditions=initial_conditions,
 )
+if walls is not None:
+    plot_walls(walls, utils.constants.WALL_SIZE)
+
+plot_assembly_area(r.figure.gca())
+thing = create_goal_patch(r.figure.gca())
 x = r.get_poses()
 
 r.step()
@@ -80,7 +88,7 @@ uni_barrier_certs = utils.custom_uni_barriers(
     safety_radius=0.12,
     projection_distance=0.05,
     group_manager=group_manager,
-    connectivity_distance=0.7,
+    connectivity_distance=2,
     barrier_gain=100,
     magnitude_limit=1,
     boundary_points=[-10, 10, -10, 10],

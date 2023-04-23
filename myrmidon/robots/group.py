@@ -19,8 +19,8 @@ class Group:
         self.agents = agents or []
         self.name = name
         # TODO: Change control gain for real robots
-        self.control_gain = 4
-        self.dist_scale = 0.35
+        self.control_gain = 2
+        self.dist_scale = 0.5
         self._L = None
         self.dists = None
         self._needs_laplacian_update = False

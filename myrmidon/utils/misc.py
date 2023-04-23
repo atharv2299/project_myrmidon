@@ -65,7 +65,7 @@ def custom_uni_barriers(
     projection_distance=0.05,
     magnitude_limit=0.2,
     boundary_points=np.array([-1.6, 1.6, -1.0, 1.0]),
-    connectivity_distance=0.5,
+    connectivity_distance=1,
     group_manager=None,
 ):
     si_barrier_cert = si_barrier_with_connectivity_and_boundary(
@@ -97,7 +97,7 @@ def si_barrier_with_connectivity_and_boundary(
     safety_radius=0.17,
     magnitude_limit=0.2,
     boundary_points=np.array([-1.6, 1.6, -1.0, 1.0]),
-    connectivity_distance=0.5,
+    connectivity_distance=1,
     group_manager=None,
 ):
     def f(dxi, x):
