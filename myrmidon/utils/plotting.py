@@ -116,8 +116,10 @@ def plot_assembly_area(ax):
     ax.add_patch(assembly_area)
 
 
-def create_goal_patch(ax):
-    goal_patch = plt.Circle((0, 0), 1, alpha=1, edgecolor="k", facecolor="r")
+def create_goal_patch(ax, center, radius):
+    goal_patch = plt.Circle(
+        center, radius, alpha=0.5, edgecolor="k", facecolor="r", zorder=0
+    )
     ax.add_patch(goal_patch)
     return goal_patch
 

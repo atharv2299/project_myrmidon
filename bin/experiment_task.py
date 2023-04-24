@@ -12,7 +12,13 @@ from rps.utilities.controllers import *
 from myrmidon import utils
 from myrmidon.interface import GUI, TUI
 from myrmidon.robots import GroupManager
-from myrmidon.utils.misc import setup_logger
+from myrmidon.utils.misc import (
+    setup_logger,
+    num_in_circle,
+    modify_patch,
+    get_circle_patch_properties,
+)
+from myrmidon.utils.plotting import create_goal_patch, plot_assembly_area, plot_walls
 
 plt.rcParams["keymap.save"].remove("s")
 _N = 10
@@ -25,27 +31,39 @@ robot_position_logger = setup_logger(
 )
 initial_conditions = np.array(
     [
-        [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],
+        [-9, -9, -9, -9, -9, -8, -8, -8, -8, -8],
         [0.8, 0.4, 0, -0.4, -0.8, 0.8, 0.4, 0, -0.4, -0.8],
-        [0, 0, 0, 0, 0, np.pi, np.pi, np.pi, np.pi, np.pi],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 )
 
 _garage = np.array(
     [
-        [-1.3, -1.3, -1.3, -1.3, -1.3, 1.3, 1.3, 1.3, 1.3, 1.3],
+        [-9, -9, -9, -9, -9, -8, -8, -8, -8, -8],
         [0.8, 0.4, 0, -0.4, -0.8, 0.8, 0.4, 0, -0.4, -0.8],
-        [0, 0, 0, 0, 0, np.pi, np.pi, np.pi, np.pi, np.pi],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 )
-garage_return_controller = create_hybrid_unicycle_pose_controller()
+
+# To index: walls[wall_num][endpoint][axis]
+walls = np.array(
+    [
+        [[-7.0, 10], [-7.0, 3]],
+        [[0, 10], [0, 3]],
+        [[5, 1], [8, 1]],
+        [[2, -10], [2, -3]],
+        [[-3.5, -10], [-3.5, -3]],
+    ]
+)
+
+garage_return_controller = create_hybrid_unicycle_pose_controller(
+    linear_velocity_gain=5
+)
 # leader_controller = create_hybrid_unicycle_pose_controller()
-leader_controller = create_clf_unicycle_position_controller()
-# uni_barrier_certs = create_unicycle_barrier_certificate_with_boundary(
-#     safety_radius=0.12, projection_distance=0.04
-# )
+leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=0.6)
+
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
-    linear_velocity_gain=0.75, angular_velocity_limit=np.pi
+    linear_velocity_gain=0.6, angular_velocity_limit=np.pi
 )
 _, uni_to_si_states = create_si_to_uni_mapping()
 uni_to_si_dyn = create_uni_to_si_dynamics()
@@ -56,14 +74,20 @@ r = robotarium.Robotarium(
     sim_in_real_time=False,
     initial_conditions=initial_conditions,
 )
+if walls is not None:
+    plot_walls(walls, utils.constants.WALL_SIZE)
+
+plot_assembly_area(r.figure.gca())
+goal = create_goal_patch(r.figure.gca(), [-4, 0], 0.7)
+num_bots_needed = 1
+
 x = r.get_poses()
-# robot_position_logger.info("Poses: [{}]".format(",".join(map(str, x.flatten()))))
 
 r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
 tui = TUI(group_manager, True)
-gui = GUI(root, group_manager, r.figure, x, walls=None)
+gui = GUI(root, group_manager, r.figure, x, walls)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )
@@ -71,18 +95,31 @@ uni_barrier_certs = utils.custom_uni_barriers(
     safety_radius=0.12,
     projection_distance=0.05,
     group_manager=group_manager,
-    connectivity_distance=0.7,
+    connectivity_distance=2,
     barrier_gain=100,
-    magnitude_limit=0.2,
+    magnitude_limit=1,
+    boundary_points=[-10, 10, -10, 10],
 )
-
 
 listener = keyboard.Listener(on_press=tui.on_press, suppress=False)
 listener.start()
 listener2 = mouse.Listener(on_click=gui.on_click, suppress=False)
 listener2.start()
-
+goal_checking = True
+wait_period = 5
 while not tui.exit:
+    center, radius = get_circle_patch_properties(goal)
+    num_goal_reached = num_in_circle(x, center, radius)
+    if num_goal_reached == num_bots_needed and goal_checking:
+        goal_time = time.time()
+        modify_patch(goal, facecolor="g")
+        goal_checking = False
+
+    if not goal_checking:
+        if time.time() - goal_time >= wait_period:
+            modify_patch(goal, center=(3, 7), facecolor="r")
+            goal_checking = True
+
     if gui.gui_override:
         if (
             tui.controlled_group_id in tui.leader_dxu
@@ -103,12 +140,10 @@ while not tui.exit:
         gui.leader_pos,
         walls,
     )
-
     gui.update_gui()
     r.set_velocities(np.arange(_N), dxu)
 
     x = r.get_poses()
-    # robot_position_logger.info("{}".format(",".join(map(str, x.flatten()))))
 
     gui.update_gui_positions(x)
 
@@ -120,14 +155,6 @@ while not tui.exit:
         tui.controlled_group,
         gui.controlled_group,
     )
-    # leader_labels2, line_follower2 = utils.plotting.update_plot(
-    #     group_manager,
-    #     line_follower2,
-    #     leader_labels2,
-    #     x,
-    #     tui.controlled_group,
-    #     gui.controlled_group,
-    # )
     r.step()
 root.destroy()
 root.mainloop()

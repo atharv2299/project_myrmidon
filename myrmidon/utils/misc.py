@@ -219,6 +219,38 @@ def setup_logger(name, log_file, level=logging.INFO, formatter=default_format):
     return logger
 
 
-def in_area(area, agent_pose):
+def in_box_area(area, agent_pose):
     x, y, w, h = area
     return (x <= agent_pose[0] <= x + w) and (y <= agent_pose[1] <= y + h)
+
+
+def num_in_circle(agent_poses, center, radius):
+    poses = agent_poses.T
+    count = 0
+    for agent_pose in poses:
+        dist = np.sqrt(
+            np.power((agent_pose[0] - center[0]), 2)
+            + np.power((agent_pose[1] - center[1]), 2)
+        )
+        if dist <= radius:
+            count += 1
+    return count
+
+
+def modify_patch(
+    patch, center=None, edgecolor=None, facecolor=None, radius=None, alpha=None
+):
+    if center is not None:
+        patch.set(center=center)
+    if edgecolor is not None:
+        patch.set(edgecolor=edgecolor)
+    if facecolor is not None:
+        patch.set(facecolor=facecolor)
+    if radius is not None:
+        patch.set(radius=radius)
+    if alpha is not None:
+        patch.set(alpha=alpha)
+
+
+def get_circle_patch_properties(patch):
+    return patch._center, patch.radius

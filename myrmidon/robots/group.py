@@ -133,7 +133,7 @@ class Group:
         return dxu
 
     def wall_avoidance(self, walls, poses, agent_id, dxs):
-        norm_dxs = dxs / np.linalg.norm(dxs)
+        norm_dxs = dxs / np.linalg.norm(dxs) + 1e-20
         too_close = False
         pose = poses[:2, [agent_id]]
         line = np.array(

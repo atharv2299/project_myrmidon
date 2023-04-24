@@ -9,7 +9,7 @@ import threading
 from functools import partial
 from tkinter import *
 from tkinter.ttk import *
-from myrmidon.utils.misc import setup_logger, in_area
+from myrmidon.utils.misc import setup_logger, in_box_area
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
@@ -20,7 +20,7 @@ from myrmidon.utils import constants
 def allow_operation(func):
     def wrapper(self, *args, **kwargs):
         leader_pose = self.group_leader_position(self.controlled_group_id)
-        allow = in_area(constants.ASSEMBLY_AREA, leader_pose)
+        allow = in_box_area(constants.ASSEMBLY_AREA, leader_pose)
         if allow:
             func(self, *args, **kwargs)
         return
@@ -210,7 +210,7 @@ class GUI:
             if ndx is not None and ndx != self._controlled_group_ndx:
                 other_group_id = self.group_ids[ndx]
                 group_leader_pose = self.group_leader_position(other_group_id)
-                allow = in_area(constants.ASSEMBLY_AREA, group_leader_pose)
+                allow = in_box_area(constants.ASSEMBLY_AREA, group_leader_pose)
                 if allow:
                     self.group_manager.combine(
                         main_group_id=self.controlled_group_id,
