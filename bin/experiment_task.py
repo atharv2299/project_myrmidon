@@ -22,13 +22,17 @@ from myrmidon.utils.plotting import create_goal_patch, plot_assembly_area, plot_
 
 plt.rcParams["keymap.save"].remove("s")
 _N = 10
+allow_logging = True
+if allow_logging:
+    logger = setup_logger(
+        "application", utils.constants.LOG_LOCATION + "_user-activity.log"
+    )
+    robot_position_logger = setup_logger(
+        "robots", utils.constants.LOG_LOCATION + "_robot_poses.log"
+    )
+else:
+    logging.disable()
 
-logger = setup_logger(
-    "application", utils.constants.LOG_LOCATION + "_user-activity.log"
-)
-robot_position_logger = setup_logger(
-    "robots", utils.constants.LOG_LOCATION + "_robot_poses.log"
-)
 initial_conditions = np.array(
     [
         [-9, -9, -9, -9, -9, -8, -8, -8, -8, -8],
@@ -87,7 +91,7 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
 tui = TUI(group_manager, True)
-gui = GUI(root, group_manager, r.figure, x, walls)
+gui = GUI(root, group_manager, r.figure, x, walls, allow_logging=allow_logging)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )

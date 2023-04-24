@@ -29,10 +29,19 @@ def allow_operation(func):
 
 
 class GUI:
-    def __init__(self, root, group_manager, robotarium_figure, agent_positions, walls):
-        self.logger = setup_logger(
-            "clicked_event", constants.LOG_LOCATION + "_user-activity.log"
-        )
+    def __init__(
+        self,
+        root,
+        group_manager,
+        robotarium_figure,
+        agent_positions,
+        walls,
+        allow_logging=True,
+    ):
+        if allow_logging:
+            self.logger = setup_logger(
+                "clicked_event", constants.LOG_LOCATION + "_user-activity.log"
+            )
         self.root = root
         self.root.title("Myrmidon")
         self.root.geometry("2560x1440")

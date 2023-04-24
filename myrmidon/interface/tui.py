@@ -6,9 +6,6 @@ from myrmidon.utils import constants
 
 class TUI:
     def __init__(self, group_manager, allow_multi_leader_movement=False) -> None:
-        self.logger = setup_logger(
-            "click_tracking", constants.LOG_LOCATION + "_user-activity.log"
-        )
         self.v = 0
         self.w = 0
         self.group_manager = group_manager
