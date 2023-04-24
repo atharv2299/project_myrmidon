@@ -19,25 +19,99 @@ from myrmidon.utils.misc import (
     get_circle_patch_properties,
 )
 from myrmidon.utils.plotting import create_goal_patch, plot_assembly_area, plot_walls
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-d",
+    "--debug",
+    help="Runs myrmidon in debug mode, which does nothing",
+    action="store_true",
+    default=False,
+)
+
+parser.add_argument(
+    "-n",
+    "--name",
+    help="Stores the user's name to use in file nameing",
+    action="append",
+    default=None,
+)
+
+parser.add_argument(
+    "-a",
+    "--allow_logging",
+    help="Allows logging",
+    action="store_true",
+    default=False,
+)
+args, _ = parser.parse_known_args()
+
+filename = ""
+if args.name is not None:
+    filename = str(args.name[0])
 
 plt.rcParams["keymap.save"].remove("s")
-_N = 10
-allow_logging = True
+_N = 20
+allow_logging = args.allow_logging
 if allow_logging:
     logger = setup_logger(
-        "application", utils.constants.LOG_LOCATION + "_user-activity.log"
+        "application",
+        utils.constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
     )
     robot_position_logger = setup_logger(
-        "robots", utils.constants.LOG_LOCATION + "_robot_poses.log"
+        "robots", utils.constants.LOG_LOCATION + "-" + filename + "_robot_poses.log"
     )
 else:
     logging.disable()
 
 initial_conditions = np.array(
     [
-        [-9, -9, -9, -9, -9, -8, -8, -8, -8, -8],
-        [0.8, 0.4, 0, -0.4, -0.8, 0.8, 0.4, 0, -0.4, -0.8],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [
+            -9.5,
+            -9.5,
+            -9.5,
+            -9.5,
+            -9.5,
+            -9,
+            -9,
+            -9,
+            -9,
+            -9,
+            -8.5,
+            -8.5,
+            -8.5,
+            -8.5,
+            -8.5,
+            -8,
+            -8,
+            -8,
+            -8,
+            -8,
+        ],
+        [
+            0.8,
+            0.4,
+            0,
+            -0.4,
+            -0.8,
+            0.8,
+            0.4,
+            0,
+            -0.4,
+            -0.8,
+            0.8,
+            0.4,
+            0,
+            -0.4,
+            -0.8,
+            0.8,
+            0.4,
+            0,
+            -0.4,
+            -0.8,
+        ],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 )
 
@@ -48,6 +122,7 @@ _garage = np.array(
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]
 )
+_garage = initial_conditions.copy()
 
 # To index: walls[wall_num][endpoint][axis]
 walls = np.array(
@@ -61,13 +136,13 @@ walls = np.array(
 )
 
 garage_return_controller = create_hybrid_unicycle_pose_controller(
-    linear_velocity_gain=5
+    linear_velocity_gain=1.5, velocity_magnitude_limit=0.8
 )
 # leader_controller = create_hybrid_unicycle_pose_controller()
-leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=0.6)
+leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=0.8)
 
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
-    linear_velocity_gain=0.6, angular_velocity_limit=np.pi
+    linear_velocity_gain=0.8, angular_velocity_limit=np.pi
 )
 _, uni_to_si_states = create_si_to_uni_mapping()
 uni_to_si_dyn = create_uni_to_si_dynamics()
@@ -82,8 +157,8 @@ if walls is not None:
     plot_walls(walls, utils.constants.WALL_SIZE)
 
 plot_assembly_area(r.figure.gca())
-goal = create_goal_patch(r.figure.gca(), [-4, 0], 0.7)
-num_bots_needed = 1
+goal = create_goal_patch(r.figure.gca(), [-4, 0], 0.5)
+num_bots_needed = 2
 
 x = r.get_poses()
 
@@ -91,7 +166,15 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
 tui = TUI(group_manager, True)
-gui = GUI(root, group_manager, r.figure, x, walls, allow_logging=allow_logging)
+gui = GUI(
+    root,
+    group_manager,
+    r.figure,
+    x,
+    walls,
+    allow_logging=allow_logging,
+    filename=filename,
+)
 leader_labels, line_follower = utils.plotting.initialize_plot(
     r, x, group_manager.num_agents
 )
@@ -114,12 +197,16 @@ wait_period = 5
 while not tui.exit:
     center, radius = get_circle_patch_properties(goal)
     num_goal_reached = num_in_circle(x, center, radius)
-    if num_goal_reached == num_bots_needed and goal_checking:
+    if num_goal_reached >= num_bots_needed and goal_checking:
         goal_time = time.time()
         modify_patch(goal, facecolor="g")
         goal_checking = False
 
     if not goal_checking:
+        if num_goal_reached < num_bots_needed:
+            goal_time = time.time()
+            modify_patch(goal, facecolor="r")
+            goal_checking = True
         if time.time() - goal_time >= wait_period:
             modify_patch(goal, center=(3, 7), facecolor="r")
             goal_checking = True

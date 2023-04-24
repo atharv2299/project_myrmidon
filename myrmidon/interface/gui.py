@@ -37,10 +37,12 @@ class GUI:
         agent_positions,
         walls,
         allow_logging=True,
+        filename="",
     ):
         if allow_logging:
             self.logger = setup_logger(
-                "clicked_event", constants.LOG_LOCATION + "_user-activity.log"
+                "mouse_logger",
+                constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
             )
         self.root = root
         self.root.title("Myrmidon")
@@ -163,7 +165,6 @@ class GUI:
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
 
     def formation_switch(self, graph):
-        print(graph)
         self.logger.info(f"clicked change graph to {graph}")
         self.group_manager.change_group_graph(
             group_id=self.controlled_group_id, graph=graph
