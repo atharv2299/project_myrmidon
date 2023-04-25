@@ -238,7 +238,12 @@ def num_in_circle(agent_poses, center, radius):
 
 
 def modify_patch(
-    patch, center=None, edgecolor=None, facecolor=None, radius=None, alpha=None
+    patch,
+    center=None,
+    edgecolor=None,
+    facecolor=None,
+    radius=None,
+    alpha=None,
 ):
     if center is not None:
         patch.set(center=center)

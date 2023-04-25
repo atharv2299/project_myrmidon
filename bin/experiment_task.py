@@ -138,11 +138,15 @@ walls = np.array(
 garage_return_controller = create_hybrid_unicycle_pose_controller(
     linear_velocity_gain=1.5, velocity_magnitude_limit=0.8
 )
+linvelgain = 3
 # leader_controller = create_hybrid_unicycle_pose_controller()
-leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=0.8)
+# leader_controller = create_clf_unicycle_position_controller(linear_velocity_gain=2)
+leader_controller = create_hybrid_unicycle_pose_controller(
+    linear_velocity_gain=linvelgain, angular_velocity_limit=np.pi * 5
+)
 
 si_to_uni_dyn = create_si_to_uni_dynamics_with_backwards_motion(
-    linear_velocity_gain=0.8, angular_velocity_limit=np.pi
+    linear_velocity_gain=linvelgain, angular_velocity_limit=np.pi * 5
 )
 _, uni_to_si_states = create_si_to_uni_mapping()
 uni_to_si_dyn = create_uni_to_si_dynamics()
@@ -153,15 +157,55 @@ r = robotarium.Robotarium(
     sim_in_real_time=False,
     initial_conditions=initial_conditions,
 )
+r.axes
 if walls is not None:
     plot_walls(walls, utils.constants.WALL_SIZE)
-
+goal_points = np.array(
+    [[5, 7], [-3.5, 6], [0, -6], [-6.5, -6], [6, -6], [8.8, 1], [-8, 8.5], [0, 0]]
+)
+goal_points = goal_points[:3]
+num_bots_needed = np.array(
+    [
+        1,
+        2,
+        1,
+        3,
+        1,
+        5,
+        3,
+        6,
+    ]
+)
+num_bots_needed = num_bots_needed[:3]
+goal_radius = num_bots_needed * 0.15 + 0.5
+i = 0
 plot_assembly_area(r.figure.gca())
-goal = create_goal_patch(r.figure.gca(), [-4, 0], 0.5)
-num_bots_needed = 2
+goal = create_goal_patch(r.figure.gca(), goal_points[i], goal_radius[i])
+goal_text = plt.text(
+    0, 0, "placeholder text", size=1, ha="center", va="center", zorder=0
+)
+goal_text.set(
+    x=goal_points[i][0], y=goal_points[i][1], text=num_bots_needed[i], size=15
+)
+plt.text(
+    -8,
+    1.2,
+    "Assembly Area",
+    size=10,
+    ha="center",
+    va="center",
+    bbox=dict(
+        boxstyle="round",
+        ec=(0, 0, 0),
+        fc=(0.2, 0.8, 0.5),
+    ),
+    zorder=0,
+)
 
+i += 1
 x = r.get_poses()
-
+# robot_position_logger.info(msg="Hello!")
+robot_position_logger.info(f"Poses: {x}")
 r.step()
 root = Tk()
 group_manager = GroupManager({}, _N)
@@ -184,7 +228,7 @@ uni_barrier_certs = utils.custom_uni_barriers(
     group_manager=group_manager,
     connectivity_distance=2,
     barrier_gain=100,
-    magnitude_limit=1,
+    magnitude_limit=10,
     boundary_points=[-10, 10, -10, 10],
 )
 
@@ -197,19 +241,48 @@ wait_period = 5
 while not tui.exit:
     center, radius = get_circle_patch_properties(goal)
     num_goal_reached = num_in_circle(x, center, radius)
-    if num_goal_reached >= num_bots_needed and goal_checking:
+    if num_goal_reached >= num_bots_needed[i - 1] and goal_checking:
         goal_time = time.time()
         modify_patch(goal, facecolor="g")
         goal_checking = False
 
     if not goal_checking:
-        if num_goal_reached < num_bots_needed:
+        if num_goal_reached < num_bots_needed[i - 1]:
             goal_time = time.time()
             modify_patch(goal, facecolor="r")
             goal_checking = True
         if time.time() - goal_time >= wait_period:
-            modify_patch(goal, center=(3, 7), facecolor="r")
-            goal_checking = True
+            if i < len(goal_points):
+                logger.info(f"Goal {i} reached")
+                modify_patch(
+                    goal,
+                    center=goal_points[i],
+                    radius=goal_radius[i],
+                    facecolor="r",
+                )
+                goal_text.set(
+                    x=goal_points[i][0],
+                    y=goal_points[i][1],
+                    text=num_bots_needed[i],
+                    size=15,
+                )
+
+                i += 1
+
+                goal_checking = True
+            else:
+                logger.info(f"Goal {i} reached")
+                modify_patch(
+                    goal,
+                    radius=0,
+                    facecolor="r",
+                )
+                goal_text.set(
+                    x=0,
+                    y=0,
+                    text="Experiment Completed!",
+                    size=30,
+                )
 
     if gui.gui_override:
         if (
@@ -235,6 +308,7 @@ while not tui.exit:
     r.set_velocities(np.arange(_N), dxu)
 
     x = r.get_poses()
+    robot_position_logger.info(f"Poses: {x}")
 
     gui.update_gui_positions(x)
 

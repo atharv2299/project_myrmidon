@@ -5,7 +5,7 @@ import numpy as np
 
 from myrmidon import utils
 from myrmidon.robots.group import Group
-from myrmidon.utils.misc import lock
+from myrmidon.utils.misc import lock, time_func
 
 
 def update_laplacian(func):
@@ -203,7 +203,7 @@ class GroupManager:
                 if (
                     np.linalg.norm(
                         agent_positions[:2, [self.groups[group_id].agents[0]]]
-                        - desired_leader_position.get(group_id)
+                        - desired_leader_position.get(group_id)[:2]
                     )
                     <= utils.constants.CLOSE_ENOUGH
                 ):

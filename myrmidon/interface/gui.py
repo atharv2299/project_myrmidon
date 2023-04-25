@@ -204,7 +204,9 @@ class GUI:
         print(f"Going to: {pos}")
         leader_position = self.group_leader_position(self.controlled_group_id)
         if leader_position is not None:
-            self.leader_pos_dict.update({self.controlled_group_id: pos})
+            self.leader_pos_dict.update(
+                {self.controlled_group_id: np.append(pos, 0).reshape((-1, 1))}
+            )
             self.logger.info(
                 f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
             )
