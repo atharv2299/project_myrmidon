@@ -5,7 +5,7 @@ import numpy as np
 
 from myrmidon import utils
 from myrmidon.robots.group import Group
-from myrmidon.utils.misc import lock, time_func
+from myrmidon.utils.misc import lock, time_func, in_box_area
 
 
 def update_laplacian(func):
@@ -45,20 +45,23 @@ class GroupManager:
         "jaguar",
     ]
 
-    def __init__(self, groups, num_agents):
+    def __init__(self, groups, num_agents, agent_positions):
         """
         Args:
             groups (dict[int, Group]): _description_
             garage (Group): _description_
         """
         self.groups = groups
-        self.garage = Group("Garage", list(range(num_agents)))
+        self.garage = Group(
+            "Garage", list(range(num_agents)), positions=agent_positions
+        )
         self._block_L = None
         self._needs_laplacian_update = False
         self.lock = threading.Lock()
         self.num_agents = sum(
             [len(group.agents) for group in self.groups.values()]
         ) + len(self.garage.agents)
+        self.agent_positions = agent_positions
 
     # @update_laplacian
     def create(self, split=False):
@@ -108,7 +111,11 @@ class GroupManager:
             main_group (_type_): _description_
             other_group (_type_): _description_
         """
-        if main_group_id == other_group_id:
+        other_group_leader = self.groups[other_group_id].agents[0]
+        other_group_leader_pose = self.agent_positions[:, [other_group_leader]]
+        if main_group_id == other_group_id or not in_box_area(
+            utils.constants.ASSEMBLY_AREA, other_group_leader_pose
+        ):
             return
         other_group = self.groups[other_group_id]
         self.groups[main_group_id].extend(other_group.agents)
@@ -148,7 +155,10 @@ class GroupManager:
         """
         if not self.garage.agents:
             return
-        self.groups[group_id].add(self.garage.remove())
+        agent = self.garage.remove()
+        if agent == -1:
+            return
+        self.groups[group_id].add(agent)
 
     @lock
     @update_laplacian
@@ -231,6 +241,11 @@ class GroupManager:
             return
         closest_leader_ndx = np.argmin(dists)
         return closest_leader_ndx
+
+    def update_positions(self, positions):
+        # For older versions of python
+        self.garage.update_positions(positions)
+        self.agent_positions = positions
 
     @property
     def leaders(self):

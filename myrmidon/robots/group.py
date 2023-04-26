@@ -1,6 +1,7 @@
 import numpy as np
 from myrmidon import utils
 from myrmidon.utils import constants
+from myrmidon.utils.misc import in_box_area
 
 # TODO: ALL DOCUMENTATION
 
@@ -15,7 +16,7 @@ def update_laplacian(func):
 
 
 class Group:
-    def __init__(self, name, agents=None):
+    def __init__(self, name, agents=None, positions=None):
         self.agents = agents or []
         self.name = name
         # TODO: Change control gain for real robots
@@ -25,6 +26,11 @@ class Group:
         self.dists = None
         self._needs_laplacian_update = False
         self.graph = "Rigid Minimal"
+        self.agent_positions = positions
+
+    def update_positions(self, positions):
+        # For older versions of python
+        self.agent_positions = positions
 
     @update_laplacian
     def add(self, agent_id):
@@ -36,7 +42,16 @@ class Group:
 
     @update_laplacian
     def remove(self):
-        return self.agents.pop()
+        if self.name != "Garage":
+            return self.agents.pop()
+        else:
+            for agent in self.agents[::-1]:
+                if agent in self.agents:
+                    agent_pose = self.agent_positions[:, [agent]]
+                    if in_box_area(utils.constants.ASSEMBLY_AREA, agent_pose):
+                        ndx = np.argwhere(np.array(self.agents) == agent)[0][0]
+                        return self.agents.pop(ndx)
+            return -1
 
     @update_laplacian
     def clear(self):
@@ -128,7 +143,7 @@ class Group:
                     magnitude
                     * np.array([[np.cos(angle)], [np.sin(angle)]]).reshape((2, -1))
                     + self.control_gain * delta
-                )
+                ) / 10
                 dxu[agent_id] = si_to_uni_dyn(dxs[:, [ndx]], poses[:, [agent_id]])
         return dxu
 

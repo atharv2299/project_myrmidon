@@ -21,6 +21,7 @@ def allow_operation(func):
     def wrapper(self, *args, **kwargs):
         leader_pose = self.group_leader_position(self.controlled_group_id)
         allow = in_box_area(constants.ASSEMBLY_AREA, leader_pose)
+        # if func.__name__
         if allow:
             func(self, *args, **kwargs)
         return
@@ -39,7 +40,8 @@ class GUI:
         allow_logging=True,
         filename="",
     ):
-        if allow_logging:
+        self.allow_logging = allow_logging
+        if self.allow_logging:
             self.logger = setup_logger(
                 "mouse_logger",
                 constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
@@ -134,38 +136,45 @@ class GUI:
 
     def on_click(self, x, y, button, pressed):
         if pressed:
-            self.logger.info(f"clicked {button}")
+            if self.allow_logging:
+                self.logger.info(f"clicked {button}")
 
     @allow_operation
     def button_separate(self):
         print("Splitting group!")
-        self.logger.info("action: group split")
+        if self.allow_logging:
+            self.logger.info("action: group split")
         self.group_manager.split(group_id=self.controlled_group_id, num_groups=2)
 
     def button_newleader(self):
         print("Creating New Leader!")
-        self.logger.info("action: new leader")
+        if self.allow_logging:
+            self.logger.info("action: new leader")
         group_id = self.group_manager.create()
         self.group_manager.add_to_group(group_id)
 
     def button_disband(self):
         print("Disbanding group!")
-        self.logger.info("action: group disband")
+        if self.allow_logging:
+            self.logger.info("action: group disband")
         self.group_manager.disband(group_id=self.controlled_group_id)
 
     @allow_operation
     def add_robot(self):
         print("Adding Robot to group!")
-        self.logger.info("action: add robot")
+        if self.allow_logging:
+            self.logger.info("action: add robot")
         self.group_manager.add_to_group(group_id=self.controlled_group_id)
 
     def remove_robot(self):
         print("Removing Robot from group!")
-        self.logger.info("action: remove robot")
+        if self.allow_logging:
+            self.logger.info("action: remove robot")
         self.group_manager.remove_from_group(group_id=self.controlled_group_id)
 
     def formation_switch(self, graph):
-        self.logger.info(f"clicked change graph to {graph}")
+        if self.allow_logging:
+            self.logger.info(f"clicked change graph to {graph}")
         self.group_manager.change_group_graph(
             group_id=self.controlled_group_id, graph=graph
         )
@@ -174,7 +183,8 @@ class GUI:
         self._controlled_group_ndx = (self._controlled_group_ndx + 1) % (
             len(self.group_ids)
         )
-        self.logger.info(f"controlled group id: {self.controlled_group_id}")
+        if self.allow_logging:
+            self.logger.info(f"controlled group id: {self.controlled_group_id}")
 
     def mouse_click_func(self, event):
 
@@ -198,7 +208,8 @@ class GUI:
             self._controlled_group_ndx = (
                 self._controlled_group_ndx if ndx is None else ndx
             )
-            self.logger.info(f"controlled group id: {self.controlled_group_id}")
+            if self.allow_logging:
+                self.logger.info(f"controlled group id: {self.controlled_group_id}")
 
     def drive_to_point(self, pos):
         print(f"Going to: {pos}")
@@ -207,9 +218,10 @@ class GUI:
             self.leader_pos_dict.update(
                 {self.controlled_group_id: np.append(pos, 0).reshape((-1, 1))}
             )
-            self.logger.info(
-                f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
-            )
+            if self.allow_logging:
+                self.logger.info(
+                    f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
+                )
         self.gui_override = True
 
     @allow_operation
@@ -228,9 +240,10 @@ class GUI:
                         main_group_id=self.controlled_group_id,
                         other_group_id=other_group_id,
                     )
-                    self.logger.info(
-                        f"action: Combined group {other_group_id} into {self.controlled_group_id}"
-                    )
+                    if self.allow_logging:
+                        self.logger.info(
+                            f"action: Combined group {other_group_id} into {self.controlled_group_id}"
+                        )
 
     def group_leader_position(self, group_id):
         if group_id not in self.group_manager.groups:

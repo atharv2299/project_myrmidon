@@ -56,11 +56,14 @@ _N = 20
 allow_logging = args.allow_logging
 if allow_logging:
     logger = setup_logger(
-        "application",
+        "goal_check",
         utils.constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
     )
+    positionFormat = logging.Formatter("%(asctime)s: %(message)s")
     robot_position_logger = setup_logger(
-        "robots", utils.constants.LOG_LOCATION + "-" + filename + "_robot_poses.log"
+        "robots",
+        utils.constants.LOG_LOCATION + "-" + filename + "_robot_poses.log",
+        formatter=positionFormat,
     )
 else:
     logging.disable()
@@ -163,7 +166,6 @@ if walls is not None:
 goal_points = np.array(
     [[5, 7], [-3.5, 6], [0, -6], [-6.5, -6], [6, -6], [8.8, 1], [-8, 8.5], [0, 0]]
 )
-goal_points = goal_points[:3]
 num_bots_needed = np.array(
     [
         1,
@@ -176,7 +178,9 @@ num_bots_needed = np.array(
         6,
     ]
 )
+goal_points = goal_points[:3]
 num_bots_needed = num_bots_needed[:3]
+
 goal_radius = num_bots_needed * 0.15 + 0.5
 i = 0
 plot_assembly_area(r.figure.gca())
@@ -201,14 +205,17 @@ plt.text(
     ),
     zorder=0,
 )
-
+if allow_logging:
+    logger.info(f"Start: go to goal {i}")
 i += 1
 x = r.get_poses()
 # robot_position_logger.info(msg="Hello!")
-robot_position_logger.info(f"Poses: {x}")
+if allow_logging:
+    robot_position_logger.info(f"{','.join(map(str, x.flatten()))}")
+
 r.step()
 root = Tk()
-group_manager = GroupManager({}, _N)
+group_manager = GroupManager({}, _N, x)
 tui = TUI(group_manager, True)
 gui = GUI(
     root,
@@ -228,7 +235,7 @@ uni_barrier_certs = utils.custom_uni_barriers(
     group_manager=group_manager,
     connectivity_distance=2,
     barrier_gain=100,
-    magnitude_limit=10,
+    magnitude_limit=5,
     boundary_points=[-10, 10, -10, 10],
 )
 
@@ -238,6 +245,9 @@ listener2 = mouse.Listener(on_click=gui.on_click, suppress=False)
 listener2.start()
 goal_checking = True
 wait_period = 5
+
+prev_log = time.time()
+log_interval = 5
 while not tui.exit:
     center, radius = get_circle_patch_properties(goal)
     num_goal_reached = num_in_circle(x, center, radius)
@@ -253,7 +263,9 @@ while not tui.exit:
             goal_checking = True
         if time.time() - goal_time >= wait_period:
             if i < len(goal_points):
-                logger.info(f"Goal {i} reached")
+                if allow_logging:
+                    logger.info(f"Finish: goal {i} reached")
+
                 modify_patch(
                     goal,
                     center=goal_points[i],
@@ -266,17 +278,23 @@ while not tui.exit:
                     text=num_bots_needed[i],
                     size=15,
                 )
-
                 i += 1
+                if allow_logging:
+                    logger.info(f"Start: go to goal {i}")
 
                 goal_checking = True
             else:
-                logger.info(f"Goal {i} reached")
+                if allow_logging:
+                    logger.info(f"Finish: goal {i} reached")
+
                 modify_patch(
                     goal,
                     radius=0,
                     facecolor="r",
                 )
+                if allow_logging:
+                    logger.info(f"Experiment Completed!")
+
                 goal_text.set(
                     x=0,
                     y=0,
@@ -308,9 +326,12 @@ while not tui.exit:
     r.set_velocities(np.arange(_N), dxu)
 
     x = r.get_poses()
-    robot_position_logger.info(f"Poses: {x}")
+    if time.time() - prev_log >= log_interval and allow_logging:
+        robot_position_logger.info(f"{','.join(map(str, x.flatten()))}")
+        prev_log = time.time()
 
     gui.update_gui_positions(x)
+    group_manager.update_positions(x)
 
     leader_labels, line_follower = utils.plotting.update_plot(
         group_manager,
