@@ -244,7 +244,7 @@ goal_set1 = GoalSet(r.figure.gca(), goal_points1, bots_per_goal1, 1, x, allow_lo
 goal_set2 = GoalSet(r.figure.gca(), goal_points2, bots_per_goal2, 2, x, allow_logging)
 goal_set3 = GoalSet(r.figure.gca(), goal_points3, bots_per_goal3, 3, x, allow_logging)
 
-while not tui.exit:
+while not (gui.exit or tui.exit):
     goal_set1.goal_check()
     goal_set2.goal_check()
     goal_set3.goal_check()
@@ -252,6 +252,7 @@ while not tui.exit:
     if goal_set1.set_complete and goal_set2.set_complete and goal_set3.set_complete:
         if allow_logging:
             logger.info(f"Experiment Completed!")
+            logging.disable()
         completion_text.set(
             x=0,
             y=0,

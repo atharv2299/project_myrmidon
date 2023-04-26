@@ -66,9 +66,20 @@ class GUI:
         self.fig = Figure(figsize=(10, 10), dpi=100, facecolor="w")
         self.fig = self.robotarium_figure
         plt.close(robotarium_figure)
-        self.selector = self.fig.canvas.mpl_connect(
-            "button_press_event", self.mouse_click_func
-        )
+        # self.selector = self.fig.canvas.mpl_connect(
+        #     "button_press_event", self.mouse_click_func
+        # )
+        self.rect = plt.Rectangle((0, 0), 1, 1, alpha=0)
+        self.x0 = None
+        self.y0 = None
+        self.x1 = None
+        self.y1 = None
+        self.fig.gca().add_patch(self.rect)
+        self.fig.canvas.mpl_connect("button_press_event", self.on_press)
+        self.fig.canvas.mpl_connect("button_release_event", self.on_release)
+        self.fig.canvas.mpl_connect("motion_notify_event", self.on_motion)
+        self.update_rect = False
+        self.selected_agents = np.array([])
         # Initialize Matplotlib features
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root)
@@ -81,7 +92,6 @@ class GUI:
         button_unselect = Button(
             self.root, text="Unselect", command=self.end_gui
         ).place(x=900 + x_offset, y=30)
-
         if enable_buttons:
             # Display Buttons, Sliders
 
@@ -144,9 +154,58 @@ class GUI:
     #     #     main_group_id=self.controlled_group_id,
     #     #     other_group_id=selected_groups[-1]
     #     # )
-
     def end_gui(self):
         self.exit = True
+
+    def on_press(self, event):
+        # print("press")
+        pos = np.array([[event.xdata], [event.ydata]])
+        if event.button == 1:
+            self.selected_agents = np.array([])
+            self.x0 = event.xdata
+            self.y0 = event.ydata
+            self.update_rect = True
+            self.rect.set(alpha=0)
+            self.fig.canvas.draw()
+            self.select_leader(pos)
+        if event.button == 3:
+            if len(self.selected_agents) == 0:
+                self.drive_individual_to_point(pos)
+            else:
+                self.drive_to_point(pos)
+
+    def on_release(self, event):
+        if event.button == 1:
+            # print("release")
+            self.x1 = event.xdata
+            self.y1 = event.ydata
+            self.in_area()
+            self.rect.set_width(self.x1 - self.x0)
+            self.rect.set_height(self.y1 - self.y0)
+            self.rect.set_xy((self.x0, self.y0))
+            self.rect.set(alpha=0)
+            self.fig.canvas.draw()
+            self.update_rect = False
+
+    def on_motion(self, event):
+        if self.update_rect:
+            x1 = event.xdata
+            y1 = event.ydata
+            self.rect.set_width(x1 - self.x0)
+            self.rect.set_height(y1 - self.y0)
+            self.rect.set_xy((self.x0, self.y0))
+            self.rect.set(alpha=0.2)
+            self.fig.canvas.draw()
+
+    def in_area(self):
+        x_min = min(self.x0, self.x1)
+        x_max = max(self.x0, self.x1)
+        y_min = min(self.y0, self.y1)
+        y_max = max(self.y0, self.y1)
+        for ndx, agent in enumerate(self.agent_positions.T[::-1]):
+            if x_min <= agent[0] <= x_max and y_min <= agent[1] <= y_max:
+                self.selected_agents = np.append(self.selected_agents, ndx)
+        print(self.selected_agents)
 
     def on_click(self, x, y, button, pressed):
         if pressed:
@@ -225,8 +284,7 @@ class GUI:
             if self.allow_logging:
                 self.logger.info(f"controlled group id: {self.controlled_group_id}")
 
-    def drive_to_point(self, pos):
-        print(f"Going to: {pos}")
+    def drive_individual_to_point(self, pos):
         leader_position = self.group_leader_position(self.controlled_group_id)
         if leader_position is not None:
             self.leader_pos_dict.update(
@@ -236,6 +294,35 @@ class GUI:
                 self.logger.info(
                     f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
                 )
+        self.gui_override = True
+
+    def drive_to_point(self, pos):
+        print(f"Going to: {pos}")
+        # leader_position = self.group_leader_position(self.controlled_group_id)
+        # if leader_position is not None:
+        #     self.leader_pos_dict.update(
+        #         {self.controlled_group_id: np.append(pos, 0).reshape((-1, 1))}
+        #     )
+        #     if self.allow_logging:
+        #         self.logger.info(
+        #             f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
+        #         )
+        for ndx in self.selected_agents:
+            # print(self.selected_agents)
+            ndx = int(ndx)
+            group_id = self.get_group_id_from_ndx(ndx)
+            print(ndx)
+            print(group_id)
+            leader_position = self.group_leader_position(group_id)
+            if leader_position is not None:
+                self.leader_pos_dict.update(
+                    {group_id: np.append(pos, 0).reshape((-1, 1))}
+                )
+                if self.allow_logging:
+                    self.logger.info(
+                        f"action: moving group:{group_id} to {(','.join(map(str, pos.flatten())))}"
+                    )
+            # print(group_id)
         self.gui_override = True
 
     @allow_operation
