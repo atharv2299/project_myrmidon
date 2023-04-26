@@ -89,9 +89,9 @@ class GUI:
         self.formation_var = StringVar(self.root)
         self.formation_var.set("Rigid Minimal")
         x_offset = 700
-        button_unselect = Button(
-            self.root, text="Unselect", command=self.end_gui
-        ).place(x=900 + x_offset, y=30)
+        button_unselect = Button(self.root, text="Exit", command=self.end_gui).place(
+            x=900 + x_offset, y=30
+        )
         if enable_buttons:
             # Display Buttons, Sliders
 
