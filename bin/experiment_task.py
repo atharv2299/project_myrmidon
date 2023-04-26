@@ -176,11 +176,7 @@ assembly_area_header = plt.text(
     size=10,
     ha="center",
     va="center",
-    bbox=dict(
-        boxstyle="round",
-        ec=(0, 0, 0),
-        fc=(0.2, 0.8, 0.5),
-    ),
+    bbox=dict(boxstyle="round", ec=(0, 0, 0), fc=(0.2, 0.8, 0.5), zorder=0, alpha=0.3),
     zorder=0,
 )
 x = r.get_poses()

@@ -69,6 +69,10 @@ class GroupManager:
 
         if not split and not self.garage.agents:
             return
+        agent = self.garage.remove()
+        if agent is None:
+            return
+        self.garage.add(agent)
 
         def generate_id():
             ndx = -1
