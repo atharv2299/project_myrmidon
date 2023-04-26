@@ -124,6 +124,13 @@ def create_goal_patch(ax, center, radius):
     return goal_patch
 
 
+def create_text(ax):
+    text = ax.text(
+        0, 0, "placeholder text", size=1, ha="center", va="center", alpha=0, zorder=0
+    )
+    return text
+
+
 def plot_walls(walls, wall_size, color="k"):
     for wall in walls:
         if wall.shape == (2, 2):

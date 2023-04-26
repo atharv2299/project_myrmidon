@@ -12,6 +12,7 @@ from rps.utilities.controllers import *
 from myrmidon import utils
 from myrmidon.interface import GUI, TUI
 from myrmidon.robots import GroupManager
+from myrmidon.utils import GoalSet
 from myrmidon.utils.misc import (
     setup_logger,
     num_in_circle,
@@ -20,6 +21,78 @@ from myrmidon.utils.misc import (
 )
 from myrmidon.utils.plotting import create_goal_patch, plot_assembly_area, plot_walls
 import argparse
+
+
+# def goal_checking(
+#     goal,
+#     i,
+#     x,
+#     num_bots_needed,
+#     goal_points,
+#     goal_radius,
+#     goal_checking,
+#     goal_time,
+#     goal_text,
+#     goal_set,
+#     goal_set_complete,
+# ):
+#     if not goal_set_complete:
+#         wait_period = 5
+#         center, radius = get_circle_patch_properties(goal)
+#         num_goal_reached = num_in_circle(x, center, radius)
+#         if num_goal_reached >= num_bots_needed[i - 1] and goal_checking:
+#             goal_time = time.time()
+#             modify_patch(goal, facecolor="g")
+#             goal_checking = False
+
+#         if not goal_checking:
+#             if num_goal_reached < num_bots_needed[i - 1]:
+#                 goal_time = time.time()
+#                 modify_patch(goal, facecolor="r")
+#                 goal_checking = True
+#             if time.time() - goal_time >= wait_period:
+#                 if i < len(goal_points):
+#                     if allow_logging:
+#                         logger.info(f"Finish: goal {i} of goal set {goal_set} reached")
+
+#                     modify_patch(
+#                         goal,
+#                         center=goal_points[i],
+#                         radius=goal_radius[i],
+#                         facecolor="r",
+#                     )
+#                     goal_text.set(
+#                         x=goal_points[i][0],
+#                         y=goal_points[i][1],
+#                         text=num_bots_needed[i],
+#                         size=15,
+#                     )
+#                     i += 1
+#                     if allow_logging:
+#                         logger.info(f"Start: go to goal {i} of goal set {goal_set}")
+
+#                     goal_checking = True
+#                 else:
+#                     if allow_logging:
+#                         logger.info(f"Finish: goal {i} of goal set {goal_set} reached")
+
+#                     modify_patch(
+#                         goal,
+#                         radius=0,
+#                         facecolor="r",
+#                     )
+#                     if allow_logging:
+#                         logger.info(f"Goal Set {goal_set} Completed!")
+#                     goal_set_complete = True
+#                     goal_text.set(
+#                         x=0,
+#                         y=0,
+#                         text="",
+#                         alpha=0,
+#                         size=30,
+#                     )
+#     return i, goal_checking, goal_time, goal_set_complete
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -57,6 +130,10 @@ allow_logging = args.allow_logging
 if allow_logging:
     logger = setup_logger(
         "goal_check",
+        utils.constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
+    )
+    mouse_logger = setup_logger(
+        "mouse_logger",
         utils.constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
     )
     positionFormat = logging.Formatter("%(asctime)s: %(message)s")
@@ -178,20 +255,37 @@ num_bots_needed = np.array(
         6,
     ]
 )
-goal_points = goal_points[:3]
-num_bots_needed = num_bots_needed[:3]
+goal_points1 = goal_points[:1]
+bots_per_goal1 = num_bots_needed[:1]
+goal_points2 = goal_points[1:2]
+bots_per_goal2 = num_bots_needed[1:2]
 
-goal_radius = num_bots_needed * 0.15 + 0.5
-i = 0
+goal_radius1 = num_bots_needed * 0.15 + 0.5
+goal_radius2 = bots_per_goal2 * 0.15 + 0.5
+
 plot_assembly_area(r.figure.gca())
-goal = create_goal_patch(r.figure.gca(), goal_points[i], goal_radius[i])
-goal_text = plt.text(
-    0, 0, "placeholder text", size=1, ha="center", va="center", zorder=0
+goal_patch1 = create_goal_patch(r.figure.gca(), goal_points1[0], goal_radius1[0])
+goal_patch2 = create_goal_patch(r.figure.gca(), goal_points2[0], goal_radius2[0])
+
+completion_text = plt.text(
+    0, 0, "placeholder text", size=1, ha="center", va="center", alpha=0, zorder=0
 )
-goal_text.set(
-    x=goal_points[i][0], y=goal_points[i][1], text=num_bots_needed[i], size=15
-)
-plt.text(
+
+# goal_text1 = create_text(r.figure.gca())
+# goal_text1 = plt.text(
+#     0, 0, "placeholder text", size=1, ha="center", va="center", zorder=0
+# )
+# goal_text.set(
+#     x=goal_points[i][0], y=goal_points[i][1], text=num_bots_needed[i], size=15
+# )
+
+# goal_text2 = plt.text(
+#     0, 0, "placeholder text", size=1, ha="center", va="center", zorder=0
+# )
+# goal_text2.set(
+#     x=goal_points2[j][0], y=goal_points2[j][1], text=num_bots_needed2[j], size=15
+# )
+assembly_area_header = plt.text(
     -8,
     1.2,
     "Assembly Area",
@@ -205,9 +299,10 @@ plt.text(
     ),
     zorder=0,
 )
-if allow_logging:
-    logger.info(f"Start: go to goal {i}")
-i += 1
+# if allow_logging:
+#     logger.info(f"Start: go to goal {i}")
+# i += 1
+# j += 1
 x = r.get_poses()
 # robot_position_logger.info(msg="Hello!")
 if allow_logging:
@@ -243,64 +338,101 @@ listener = keyboard.Listener(on_press=tui.on_press, suppress=False)
 listener.start()
 listener2 = mouse.Listener(on_click=gui.on_click, suppress=False)
 listener2.start()
-goal_checking = True
-wait_period = 5
+# goal_check1 = True
+# goal_check2 = True
+# wait_period = 5
+# goal_time1 = None
+# goal_time2 = None
 
+# goal_set1_complete = False
+# goal_set2_complete = False
 prev_log = time.time()
 log_interval = 5
+goal_set1 = GoalSet(r.figure.gca(), goal_points1, bots_per_goal1, 1, x, allow_logging)
+goal_set2 = GoalSet(r.figure.gca(), goal_points2, bots_per_goal2, 2, x, allow_logging)
 while not tui.exit:
-    center, radius = get_circle_patch_properties(goal)
-    num_goal_reached = num_in_circle(x, center, radius)
-    if num_goal_reached >= num_bots_needed[i - 1] and goal_checking:
-        goal_time = time.time()
-        modify_patch(goal, facecolor="g")
-        goal_checking = False
+    goal_set1.goal_check()
+    goal_set2.goal_check()
+    # i, goal_check1, goal_time1, goal_set1_complete = goal_checking(
+    #     goal,
+    #     i,
+    #     x,
+    #     num_bots_needed,
+    #     goal_points,
+    #     goal_radius,
+    #     goal_check1,
+    #     goal_time1,
+    #     goal_text,
+    #     1,
+    #     goal_set1_complete,
+    # )
+    # j, goal_check2, goal_time2, goal_set2_complete = goal_checking(
+    #     goal2,
+    #     j,
+    #     x,
+    #     num_bots_needed2,
+    #     goal_points2,
+    #     goal_radius2,
+    #     goal_check2,
+    #     goal_time2,
+    #     goal_text2,
+    #     2,
+    #     goal_set2_complete,
+    # )
+    # center, radius = get_circle_patch_properties(goal)
+    # num_goal_reached = num_in_circle(x, center, radius)
+    # if num_goal_reached >= num_bots_needed[i - 1] and goal_checking:
+    #     goal_time = time.time()
+    #     modify_patch(goal, facecolor="g")
+    #     goal_checking = False
 
-    if not goal_checking:
-        if num_goal_reached < num_bots_needed[i - 1]:
-            goal_time = time.time()
-            modify_patch(goal, facecolor="r")
-            goal_checking = True
-        if time.time() - goal_time >= wait_period:
-            if i < len(goal_points):
-                if allow_logging:
-                    logger.info(f"Finish: goal {i} reached")
+    # if not goal_checking:
+    #     if num_goal_reached < num_bots_needed[i - 1]:
+    #         goal_time = time.time()
+    #         modify_patch(goal, facecolor="r")
+    #         goal_checking = True
+    #     if time.time() - goal_time >= wait_period:
+    #         if i < len(goal_points):
+    #             if allow_logging:
+    #                 logger.info(f"Finish: goal {i} reached")
 
-                modify_patch(
-                    goal,
-                    center=goal_points[i],
-                    radius=goal_radius[i],
-                    facecolor="r",
-                )
-                goal_text.set(
-                    x=goal_points[i][0],
-                    y=goal_points[i][1],
-                    text=num_bots_needed[i],
-                    size=15,
-                )
-                i += 1
-                if allow_logging:
-                    logger.info(f"Start: go to goal {i}")
+    #             modify_patch(
+    #                 goal,
+    #                 center=goal_points[i],
+    #                 radius=goal_radius[i],
+    #                 facecolor="r",
+    #             )
+    #             goal_text.set(
+    #                 x=goal_points[i][0],
+    #                 y=goal_points[i][1],
+    #                 text=num_bots_needed[i],
+    #                 size=15,
+    #             )
+    #             i += 1
+    #             if allow_logging:
+    #                 logger.info(f"Start: go to goal {i}")
 
-                goal_checking = True
-            else:
-                if allow_logging:
-                    logger.info(f"Finish: goal {i} reached")
+    #             goal_checking = True
+    #         else:
+    #             if allow_logging:
+    #                 logger.info(f"Finish: goal {i} reached")
 
-                modify_patch(
-                    goal,
-                    radius=0,
-                    facecolor="r",
-                )
-                if allow_logging:
-                    logger.info(f"Experiment Completed!")
+    #             modify_patch(
+    #                 goal,
+    #                 radius=0,
+    #                 facecolor="r",
+    #             )
 
-                goal_text.set(
-                    x=0,
-                    y=0,
-                    text="Experiment Completed!",
-                    size=30,
-                )
+    if goal_set1.set_complete and goal_set2.set_complete:
+        if allow_logging:
+            logger.info(f"Experiment Completed!")
+        completion_text.set(
+            x=0,
+            y=0,
+            text="Experiment Completed!",
+            alpha=1,
+            size=30,
+        )
 
     if gui.gui_override:
         if (

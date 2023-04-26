@@ -1,4 +1,4 @@
-# import logging
+import logging
 
 import matplotlib
 import numpy as np
@@ -42,10 +42,11 @@ class GUI:
     ):
         self.allow_logging = allow_logging
         if self.allow_logging:
-            self.logger = setup_logger(
-                "mouse_logger",
-                constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
-            )
+            # self.logger = setup_logger(
+            #     "mouse_logger",
+            #     constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
+            # )
+            self.logger = logging.getLogger("mouse_logger")
         self.root = root
         self.root.title("Myrmidon")
         self.root.geometry("2560x1440")
