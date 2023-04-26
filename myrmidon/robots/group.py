@@ -51,7 +51,6 @@ class Group:
                     if in_box_area(utils.constants.ASSEMBLY_AREA, agent_pose):
                         ndx = np.argwhere(np.array(self.agents) == agent)[0][0]
                         return self.agents.pop(ndx)
-            return -1
 
     @update_laplacian
     def clear(self):

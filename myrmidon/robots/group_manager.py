@@ -156,7 +156,7 @@ class GroupManager:
         if not self.garage.agents:
             return
         agent = self.garage.remove()
-        if agent == -1:
+        if agent is None:
             return
         self.groups[group_id].add(agent)
 
