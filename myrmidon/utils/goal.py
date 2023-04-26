@@ -1,8 +1,6 @@
 import time
-from myrmidon.utils.misc import modify_patch
-from myrmidon.utils.plotting import create_goal_patch, create_text
+from myrmidon.utils.plotting import create_goal_patch, create_text, modify_patch
 import numpy as np
-import matplotlib.pyplot as plt
 import logging
 
 
@@ -44,10 +42,9 @@ class GoalSet:
 
     def goal_check(self):
         if not self.set_complete:
-            center, radius = self.get_circle_patch_properties()
             num_goal_reached = self.num_in_circle()
             if (
-                num_goal_reached >= self.bots_per_goal[self.goal_num - 1]
+                num_goal_reached >= self.bots_per_goal[self.goal_num]
                 and self.check_goal
             ):
                 self.goal_time = time.time()
@@ -55,17 +52,19 @@ class GoalSet:
                 self.check_goal = False
 
             if not self.check_goal:
-                if num_goal_reached < self.bots_per_goal[self.goal_num - 1]:
+                if num_goal_reached != self.bots_per_goal[self.goal_num]:
                     self.goal_time = time.time()
                     modify_patch(self.goal, facecolor="r")
                     self.check_goal = True
+
                 if time.time() - self.goal_time >= self.wait_time:
-                    if self.goal_num != len(self.goal_points):
+                    if self.goal_num < len(self.goal_points) - 1:
                         if self.allow_logging:
                             self.logger.info(
                                 f"Finish: goal {self.goal_num} of goal set {self.set_number} reached"
                             )
 
+                        self.goal_num += 1
                         modify_patch(
                             self.goal,
                             center=self.goal_points[self.goal_num],
@@ -78,7 +77,6 @@ class GoalSet:
                             text=self.bots_per_goal[self.goal_num],
                             size=15,
                         )
-                        self.goal_num += 1
                         if self.allow_logging:
                             self.logger.info(
                                 f"Start: go to goal {self.goal_num} of goal set {self.set_number}"
@@ -123,5 +121,5 @@ class GoalSet:
                 count += 1
         return count
 
-    def update_robot_positoins(self, positions):
+    def update_robot_positions(self, positions):
         self.robot_positions = positions

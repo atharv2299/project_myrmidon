@@ -131,6 +131,26 @@ def create_text(ax):
     return text
 
 
+def modify_patch(
+    patch,
+    center=None,
+    edgecolor=None,
+    facecolor=None,
+    radius=None,
+    alpha=None,
+):
+    if center is not None:
+        patch.set(center=center)
+    if edgecolor is not None:
+        patch.set(edgecolor=edgecolor)
+    if facecolor is not None:
+        patch.set(facecolor=facecolor)
+    if radius is not None:
+        patch.set(radius=radius)
+    if alpha is not None:
+        patch.set(alpha=alpha)
+
+
 def plot_walls(walls, wall_size, color="k"):
     for wall in walls:
         if wall.shape == (2, 2):
