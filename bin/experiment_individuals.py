@@ -53,16 +53,22 @@ allow_logging = args.allow_logging
 if allow_logging:
     logger = setup_logger(
         "goal_check",
-        utils.constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
+        utils.constants.LOG_LOCATION
+        + "-individuals-"
+        + filename
+        + "_user-activity.log",
     )
     mouse_logger = setup_logger(
         "mouse_logger",
-        utils.constants.LOG_LOCATION + "-" + filename + "_user-activity.log",
+        utils.constants.LOG_LOCATION
+        + "-individuals-"
+        + filename
+        + "_user-activity.log",
     )
     positionFormat = logging.Formatter("%(asctime)s: %(message)s")
     robot_position_logger = setup_logger(
         "robots",
-        utils.constants.LOG_LOCATION + "-" + filename + "_robot_poses.log",
+        utils.constants.LOG_LOCATION + "-individuals-" + filename + "_robot_poses.log",
         formatter=positionFormat,
     )
 else:
