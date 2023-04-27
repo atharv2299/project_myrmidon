@@ -135,6 +135,10 @@ walls = np.array(
         [[5, 1], [8, 1]],
         [[2, -10], [2, -3]],
         [[-3.5, -10], [-3.5, -3]],
+        [[-7, 7], [-2, 7]],
+        [[-5, 0], [3, 0]],
+        [[3.6, -5.5], [10, -5.5]],
+        [[3.6, -5.5], [3.6, -3]],
     ]
 )
 
@@ -233,12 +237,13 @@ num_bots_needed = np.array(
     ]
 )
 goal_points1 = goal_points[:3]
-bots_per_goal1 = num_bots_needed[:3]
 goal_points2 = goal_points[3:6]
-bots_per_goal2 = num_bots_needed[3:6]
-
 goal_points3 = goal_points[6:]
+
+bots_per_goal1 = num_bots_needed[:3]
+bots_per_goal2 = num_bots_needed[3:6]
 bots_per_goal3 = num_bots_needed[6:]
+
 
 goal_set1 = GoalSet(r.figure.gca(), goal_points1, bots_per_goal1, 1, x, allow_logging)
 goal_set2 = GoalSet(r.figure.gca(), goal_points2, bots_per_goal2, 2, x, allow_logging)

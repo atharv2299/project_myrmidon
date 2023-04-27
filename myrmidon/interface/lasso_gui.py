@@ -311,8 +311,6 @@ class GUI:
             # print(self.selected_agents)
             ndx = int(ndx)
             group_id = self.get_group_id_from_ndx(ndx)
-            print(ndx)
-            print(group_id)
             leader_position = self.group_leader_position(group_id)
             if leader_position is not None:
                 self.leader_pos_dict.update(

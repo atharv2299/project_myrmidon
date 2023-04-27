@@ -73,7 +73,6 @@ if walls is not None:
     plot_walls(walls, utils.constants.WALL_SIZE)
 
 plot_assembly_area(r.figure.gca())
-thing = create_goal_patch(r.figure.gca())
 x = r.get_poses()
 
 r.step()

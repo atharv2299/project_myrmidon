@@ -44,7 +44,7 @@ class GoalSet:
         if not self.set_complete:
             num_goal_reached = self.num_in_circle()
             if (
-                num_goal_reached >= self.bots_per_goal[self.goal_num]
+                num_goal_reached == self.bots_per_goal[self.goal_num]
                 and self.check_goal
             ):
                 self.goal_time = time.time()
