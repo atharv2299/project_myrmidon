@@ -135,6 +135,10 @@ walls = np.array(
         [[5, 1], [8, 1]],
         [[2, -10], [2, -3]],
         [[-3.5, -10], [-3.5, -3]],
+        [[-7, 7], [-2, 7]],
+        [[-5, 0], [3, 0]],
+        [[3.6, -5.5], [10, -5.5]],
+        [[3.6, -5.5], [3.6, -3]],
     ]
 )
 
@@ -218,32 +222,52 @@ listener2.start()
 prev_log = time.time()
 log_interval = 5
 
-goal_points = np.array(
-    [[5, 7], [-3.5, 6], [0, -6], [-6.5, -6], [6, -6], [8.8, 1], [-8, 8.5], [0, 0]]
-)
-num_bots_needed = np.array(
+# goal_points = np.array(
+#     [[5, 7], [-3.5, 6], [0, -6], [-6.5, -6], [6, -6], [8.8, 1], [-8, 8.5], [0, 0]]
+# )
+# num_bots_needed = np.array(
+#     [
+#         1,
+#         2,
+#         1,
+#         3,
+#         1,
+#         5,
+#         3,
+#         6,
+#     ]
+# )
+goal_point_1 = np.array(
     [
-        1,
-        2,
-        1,
-        3,
-        1,
-        5,
-        3,
-        6,
+        [-8.8, 2],
+        [-4.5, 5.3],
+        [2.75, 2],
+        [1.5, 9],
+        [8.8, 0],
+        [3, -5.8],
+        [1.1, -8.5],
+        [-0.75, -0.75],
+        [-4.9, -3.1],
     ]
 )
-goal_points1 = goal_points[:3]
-bots_per_goal1 = num_bots_needed[:3]
-goal_points2 = goal_points[3:6]
-bots_per_goal2 = num_bots_needed[3:6]
+goal_pointsm = np.array(
+    [[9, -6], [4, 0], [-4.4, -8.6], [-1.3, 5.3], [2.7, -2.8], [-8.5, -8.1]]
+)
+goal_pointmd = np.array([[-8.2, 8.6], [-0.6, 1.7], [6.5, -7.5], [8.75, 1.15]])
+goal_pointlg = np.array(
+    [[5, 7], [-7, -6.25], [-4.7, 6.5], [6.75, -3.1], [-0.75, -6.25]]
+)
 
-goal_points3 = goal_points[6:]
-bots_per_goal3 = num_bots_needed[6:]
+bots_per_goal_1 = np.ones(len(goal_point_1), dtype=int)
+bots_per_goal_sm = np.array([1, 2, 1, 1, 1, 2])
+bots_per_goal_md = np.array([3, 5, 5, 4])
+bots_per_goal_lg = np.array([12, 11, 6, 10, 12])
 
-goal_set1 = GoalSet(r.figure.gca(), goal_points1, bots_per_goal1, 1, x, allow_logging)
-goal_set2 = GoalSet(r.figure.gca(), goal_points2, bots_per_goal2, 2, x, allow_logging)
-goal_set3 = GoalSet(r.figure.gca(), goal_points3, bots_per_goal3, 3, x, allow_logging)
+
+goal_set1 = GoalSet(r.figure.gca(), goal_point_1, bots_per_goal_1, 1, x, allow_logging)
+goal_set2 = GoalSet(r.figure.gca(), goal_pointsm, bots_per_goal_sm, 2, x, allow_logging)
+goal_set3 = GoalSet(r.figure.gca(), goal_pointmd, bots_per_goal_md, 3, x, allow_logging)
+goal_set4 = GoalSet(r.figure.gca(), goal_pointlg, bots_per_goal_lg, 4, x, allow_logging)
 
 for i in range(_N):
     gui.button_newleader()
@@ -252,14 +276,20 @@ while not (gui.exit or tui.exit):
     goal_set1.goal_check()
     goal_set2.goal_check()
     goal_set3.goal_check()
+    goal_set4.goal_check()
 
-    if goal_set1.set_complete and goal_set2.set_complete and goal_set3.set_complete:
+    if (
+        goal_set1.set_complete
+        and goal_set2.set_complete
+        and goal_set3.set_complete
+        and goal_set4.set_complete
+    ):
         if allow_logging:
             logger.info(f"Experiment Completed!")
             logging.disable()
         completion_text.set(
-            x=0,
-            y=0,
+            x=-1,
+            y=0.5,
             text="Experiment Completed!",
             alpha=1,
             size=30,
@@ -298,6 +328,7 @@ while not (gui.exit or tui.exit):
     goal_set1.update_robot_positions(x)
     goal_set2.update_robot_positions(x)
     goal_set3.update_robot_positions(x)
+    goal_set4.update_robot_positions(x)
 
     leader_labels, line_follower = utils.plotting.update_plot(
         group_manager,

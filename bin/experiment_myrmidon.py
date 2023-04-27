@@ -10,7 +10,7 @@ from rps.utilities.barrier_certificates import *
 from rps.utilities.controllers import *
 
 from myrmidon import utils
-from myrmidon.interface import GUI, TUI
+from myrmidon.interface import LassoGUI, TUI
 from myrmidon.robots import GroupManager
 from myrmidon.utils import GoalSet
 from myrmidon.utils.misc import setup_logger
@@ -191,7 +191,7 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N, x)
 tui = TUI(group_manager, True)
-gui = GUI(
+gui = LassoGUI(
     root,
     group_manager,
     r.figure,
@@ -221,27 +221,44 @@ listener2.start()
 prev_log = time.time()
 log_interval = 5
 
-goal_points = np.array(
-    [[5, 7], [-3.5, 6], [0, -6], [-6.5, -6], [6, -6], [8.8, 1], [-8, 8.5], [0, 0]]
-)
-num_bots_needed = np.array(
+# goal_points = np.array(
+#     [[5, 7], [-3.5, 6], [0, -6], [-6.5, -6], [6, -6], [8.8, 1], [-8, 8.5], [0, 0]]
+# )
+# num_bots_needed = np.array(
+#     [
+#         1,
+#         2,
+#         1,
+#         3,
+#         1,
+#         5,
+#         3,
+#         6,
+#     ]
+# )
+goal_point_1 = np.array(
     [
-        1,
-        2,
-        1,
-        3,
-        1,
-        5,
-        3,
-        6,
+        [-8.8, 2],
+        [-4.5, 5.3],
+        [2.75, 2],
+        [1.5, 9],
+        [8.8, 0],
+        [3, -5.8],
+        [1.1, -8.5],
+        [-0.75, -0.75],
+        [-4.9, -3.1],
     ]
 )
-goal_point_1 = np.array([[-8.8, 2], [-4.5, 5.3], [2.75, 2], [1.5, 9], [8.8, 0], [3, -5.8], [1.1, -8.5], [-0.75, -0.75], [-4.9, -3.1]])
-goal_pointsm = np.array([[9, -6], [4,0], [-4.4, -8.6], [-1.3, 5.3], [2.7, -2.8], [-8.5, -8.1]])
-goal_pointmd = np.array([[-8.2, 8.6], [-0.6, 1.7] ,[6.5, -7.5], [8.75, 1.15]])
-goal_pointlg = np.array([[5,7], [-7,-6.25], [-4.7, 6.5], [6.75, -3.1], [-.75,-6.25]])
+# goal_point_1 = goal_point_1[:1]
+goal_pointsm = np.array(
+    [[9, -6], [4, 0], [-4.4, -8.6], [-1.3, 5.3], [2.7, -2.8], [-8.5, -8.1]]
+)
+goal_pointmd = np.array([[-8.2, 8.6], [-0.6, 1.7], [6.5, -7.5], [8.75, 1.15]])
+goal_pointlg = np.array(
+    [[5, 7], [-7, -6.25], [-4.7, 8.5], [6.75, -3.1], [-0.75, -6.25]]
+)
 
-bots_per_goal_1 = np.ones(len(goal_point_1))
+bots_per_goal_1 = np.ones(len(goal_point_1), dtype=int)
 bots_per_goal_sm = np.array([1, 2, 1, 1, 1, 2])
 bots_per_goal_md = np.array([3, 5, 5, 4])
 bots_per_goal_lg = np.array([12, 11, 6, 10, 12])
@@ -256,15 +273,20 @@ while not (gui.exit or tui.exit):
     goal_set1.goal_check()
     goal_set2.goal_check()
     goal_set3.goal_check()
-    goal_set4.goal_check() 
+    goal_set4.goal_check()
 
-    if goal_set1.set_complete and goal_set2.set_complete and goal_set3.set_complete and goal_set4.set_complete:
+    if (
+        goal_set1.set_complete
+        and goal_set2.set_complete
+        and goal_set3.set_complete
+        and goal_set4.set_complete
+    ):
         if allow_logging:
             logger.info(f"Experiment Completed!")
             logging.disable()
         completion_text.set(
-            x=0,
-            y=0,
+            x=-1,
+            y=0.5,
             text="Experiment Completed!",
             alpha=1,
             size=30,

@@ -202,10 +202,11 @@ class GUI:
         x_max = max(self.x0, self.x1)
         y_min = min(self.y0, self.y1)
         y_max = max(self.y0, self.y1)
-        for ndx, agent in enumerate(self.agent_positions.T[::-1]):
+        for ndx, agent in enumerate(self.agent_positions.T):
             if x_min <= agent[0] <= x_max and y_min <= agent[1] <= y_max:
                 self.selected_agents = np.append(self.selected_agents, ndx)
-        print(self.selected_agents)
+                # self.selected_agent_ids = np.append(self.selected_agent_ids, agent)
+        # print(self.selected_agents)
 
     def on_click(self, x, y, button, pressed):
         if pressed:
@@ -308,18 +309,30 @@ class GUI:
         #             f"action: moving group:{self.controlled_group_id} to {(','.join(map(str, pos.flatten())))}"
         #         )
         for ndx in self.selected_agents:
-            # print(self.selected_agents)
+            # print(ndx)
             ndx = int(ndx)
-            group_id = self.get_group_id_from_ndx(ndx)
-            leader_position = self.group_leader_position(group_id)
-            if leader_position is not None:
-                self.leader_pos_dict.update(
-                    {group_id: np.append(pos, 0).reshape((-1, 1))}
-                )
-                if self.allow_logging:
-                    self.logger.info(
-                        f"action: moving group:{group_id} to {(','.join(map(str, pos.flatten())))}"
-                    )
+            group_id = None
+            # print(self.selected_agents)
+            if ndx in self.group_manager.leaders:
+                for group in self.group_manager.groups:
+                    # print(self.group_manager.groups[group].agents)
+                    if ndx in self.group_manager.groups[group].agents:
+                        group_id = group
+                # if ndx in self.group_manager.leaders:
+                #     print(f"{ndx} is a LEADER")
+                # else:
+                #     print(f"{ndx} is not a leader")
+                # group_id = self.get_group_id_from_ndx(ndx)
+                if group_id is not None:
+                    leader_position = self.group_leader_position(group_id)
+                    if leader_position is not None:
+                        self.leader_pos_dict.update(
+                            {group_id: np.append(pos, 0).reshape((-1, 1))}
+                        )
+                        if self.allow_logging:
+                            self.logger.info(
+                                f"action: moving group:{group_id} to {(','.join(map(str, pos.flatten())))}"
+                            )
             # print(group_id)
         self.gui_override = True
 
@@ -357,6 +370,7 @@ class GUI:
     def get_group_id_from_ndx(self, ndx):
         if ndx >= len(self.group_ids):
             return None
+        print(self.group_ids[ndx], ndx)
         return self.group_ids[ndx]
 
     def update_gui_positions(self, positions):
