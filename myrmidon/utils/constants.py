@@ -1,5 +1,5 @@
 CLOSE_ENOUGH = 0.05
-LEADER_SELECTION_RADIUS = 0.1
+LEADER_SELECTION_RADIUS = 0.13
 COLORS = [
     "orange",
     "skyblue",

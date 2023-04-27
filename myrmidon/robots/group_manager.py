@@ -238,7 +238,7 @@ class GroupManager:
         return dxu
 
     def closest_leader_to_point(self, agent_positions, pt):
-        leader_positions = agent_positions[:2, self.leaders]
+        leader_positions = agent_positions[:2, self.leaders] - np.array([[0.12], [0]])
         dists = np.linalg.norm(leader_positions - pt, axis=0)
         dists_in_range = dists[dists < utils.constants.LEADER_SELECTION_RADIUS]
         if not dists_in_range.size > 0:
