@@ -48,6 +48,7 @@ def update_plot(
     x,
     tui_controlled_group,
     gui_controlled_group,
+    gui_selected_agents=None,
 ):
     if not group_manager.groups:
         for leader_label in leader_labels:
@@ -67,16 +68,29 @@ def update_plot(
             leader_label.set_alpha(1)
             leader_label.set_offsets(x[:2, ndx].T)
 
-            if tui_controlled_group:
-                if ndx == tui_controlled_group.agents[0]:
-                    leader_label.set_edgecolor("lime")
-                else:
-                    leader_label.set_edgecolor("red")
+            # if tui_controlled_group:
+            #     if ndx == tui_controlled_group.agents[0]:
+            #         leader_label.set_edgecolor("lime")
+            #     else:
+            #         leader_label.set_edgecolor("red")
             if gui_controlled_group:
                 if ndx == gui_controlled_group.agents[0]:
-                    leader_label.set_facecolor("green")
+                    leader_label.set_edgecolor("lime")
+                    leader_label.set_facecolor("blue")
+
+                    if gui_selected_agents is not None and len(gui_selected_agents) > 0:
+                        leader_label.set_edgecolor("red")
                 else:
+                    leader_label.set_edgecolor("red")
                     leader_label.set_facecolor("none")
+            if gui_selected_agents is not None and ndx in gui_selected_agents:
+                # if ndx == gui_controlled_group.agents[0]:
+                leader_label.set_edgecolor("lime")
+                # else:
+                #     leader_label.set_edgecolor("none")
+            # else:
+            #     leader_label.set_edgecolor("red")
+
         else:
             leader_label.set_alpha(0)
 

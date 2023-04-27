@@ -203,6 +203,7 @@ class Group:
 
     @property
     def create_graph(self):
+        self.dist_scale = 0.5
         if self.graph == "Rigid Minimal":
             return utils.graph.rigid_minimal_GL()
         elif self.graph == "Cycle":
@@ -210,6 +211,7 @@ class Group:
         elif self.graph == "Complete":
             return utils.graph.complete_GL()
         elif self.graph == "Line":
+            self.dist_scale = 0.2
             return utils.graph.line_GL()
         elif self.graph == "Directed Cycle":
             return utils.graph.directed_cycle_GL()

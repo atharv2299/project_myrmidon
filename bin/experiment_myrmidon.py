@@ -209,7 +209,7 @@ uni_barrier_certs = utils.custom_uni_barriers(
     group_manager=group_manager,
     connectivity_distance=2,
     barrier_gain=100,
-    magnitude_limit=5,
+    magnitude_limit=2,
     boundary_points=[-10, 10, -10, 10],
 )
 
@@ -334,6 +334,7 @@ while not (gui.exit or tui.exit):
         x,
         tui.controlled_group,
         gui.controlled_group,
+        gui.selected_agents,
     )
     r.step()
 root.destroy()

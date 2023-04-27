@@ -161,7 +161,6 @@ class GUI:
         # print("press")
         pos = np.array([[event.xdata], [event.ydata]])
         if event.button == 1:
-            self.selected_agents = np.array([])
             self.x0 = event.xdata
             self.y0 = event.ydata
             self.update_rect = True
@@ -178,6 +177,7 @@ class GUI:
     def on_release(self, event):
         if event.button == 1:
             # print("release")
+            self.selected_agents = np.array([])
             self.x1 = event.xdata
             self.y1 = event.ydata
             self.in_area()
@@ -279,6 +279,8 @@ class GUI:
             ndx = self.group_manager.closest_leader_to_point(
                 agent_positions=self.agent_positions, pt=pos
             )
+            self.selected_agents = np.append(self.selected_agents, ndx)
+            print(self.selected_agents)
             self._controlled_group_ndx = (
                 self._controlled_group_ndx if ndx is None else ndx
             )
