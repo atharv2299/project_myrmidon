@@ -153,7 +153,6 @@ class GUI:
             if self.allow_logging:
                 self.logger.info(f"clicked {button}")
 
-    @allow_operation
     def button_separate(self):
         print("Splitting group!")
         if self.allow_logging:

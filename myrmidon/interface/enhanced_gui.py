@@ -173,6 +173,8 @@ class GUI:
                 self.drive_individual_to_point(pos)
             else:
                 self.drive_to_point(pos)
+        if event.button == 2:
+            self.join_groups(pos)
 
     def on_release(self, event):
         if event.button == 1:
@@ -213,7 +215,6 @@ class GUI:
             if self.allow_logging:
                 self.logger.info(f"clicked {button}")
 
-    @allow_operation
     def button_separate(self):
         print("Splitting group!")
         if self.allow_logging:
@@ -226,6 +227,9 @@ class GUI:
             self.logger.info("action: new leader")
         group_id = self.group_manager.create()
         self.group_manager.add_to_group(group_id)
+        # TODO: Select leader
+        while self.controlled_group_id != group_id:
+            self.next_controlled_group()
 
     def button_disband(self):
         print("Disbanding group!")
