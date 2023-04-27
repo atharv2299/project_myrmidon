@@ -10,7 +10,7 @@ from rps.utilities.barrier_certificates import *
 from rps.utilities.controllers import *
 
 from myrmidon import utils
-from myrmidon.interface import LassoGUI, TUI
+from myrmidon.interface import EnhancedGUI, TUI
 from myrmidon.robots import GroupManager
 from myrmidon.utils import GoalSet
 from myrmidon.utils.misc import setup_logger
@@ -191,7 +191,7 @@ r.step()
 root = Tk()
 group_manager = GroupManager({}, _N, x)
 tui = TUI(group_manager, True)
-gui = LassoGUI(
+gui = EnhancedGUI(
     root,
     group_manager,
     r.figure,

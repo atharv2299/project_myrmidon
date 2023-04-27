@@ -166,6 +166,7 @@ class GUI:
             self.y0 = event.ydata
             self.update_rect = True
             self.rect.set(alpha=0)
+            self.rect.set_xy((self.x0, self.y0))
             self.fig.canvas.draw()
             self.select_leader(pos)
         if event.button == 3:
@@ -182,7 +183,6 @@ class GUI:
             self.in_area()
             self.rect.set_width(self.x1 - self.x0)
             self.rect.set_height(self.y1 - self.y0)
-            self.rect.set_xy((self.x0, self.y0))
             self.rect.set(alpha=0)
             self.fig.canvas.draw()
             self.update_rect = False
@@ -191,9 +191,9 @@ class GUI:
         if self.update_rect:
             x1 = event.xdata
             y1 = event.ydata
-            self.rect.set_width(x1 - self.x0)
-            self.rect.set_height(y1 - self.y0)
-            self.rect.set_xy((self.x0, self.y0))
+            self.rect.set(width=(x1 - self.x0), height=(y1 - self.y0))
+            # self.rect.set_height(y1 - self.y0)
+            # self.rect.set_xy((self.x0, self.y0))
             self.rect.set(alpha=0.2)
             self.fig.canvas.draw()
 
