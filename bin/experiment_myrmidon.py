@@ -274,6 +274,7 @@ while not (gui.exit or tui.exit):
     goal_set2.goal_check()
     goal_set3.goal_check()
     goal_set4.goal_check()
+    gui.score_label['text'] = (goal_set1.score + goal_set2.score + goal_set3.score + goal_set4.score)*100/60
 
     if (
         goal_set1.set_complete
