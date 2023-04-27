@@ -28,7 +28,7 @@ class GoalSet:
         self.goal_num = 0
         self.wait_time = 5
         self.goal_time = None
-
+        self.score = 0
         self.goal_text.set(
             x=self.goal_points[self.goal_num][0],
             y=self.goal_points[self.goal_num][1],
@@ -63,7 +63,7 @@ class GoalSet:
                             self.logger.info(
                                 f"Finish: goal {self.goal_num} of goal set {self.set_number} reached"
                             )
-
+                        self.score += self.bots_per_goal[self.goal_num]
                         self.goal_num += 1
                         modify_patch(
                             self.goal,

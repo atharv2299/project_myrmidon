@@ -274,8 +274,17 @@ while not (gui.exit or tui.exit):
     goal_set2.goal_check()
     goal_set3.goal_check()
     goal_set4.goal_check()
-    gui.score_label['text'] = (goal_set1.score + goal_set2.score + goal_set3.score + goal_set4.score)*100/60
-
+    gui.score_label["text"] = (
+        "Score: "
+        + str((goal_set1.score + goal_set2.score + goal_set3.score + goal_set4.score))
+        + "/"
+        + str(
+            np.sum(bots_per_goal_1)
+            + np.sum(bots_per_goal_sm)
+            + np.sum(bots_per_goal_md)
+            + np.sum(bots_per_goal_lg)
+        )
+    )
     if (
         goal_set1.set_complete
         and goal_set2.set_complete

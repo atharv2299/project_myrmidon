@@ -261,7 +261,7 @@ goal_pointsm = np.array(
 )
 goal_pointmd = np.array([[-8.2, 8.6], [-0.6, 1.7], [6.5, -7.5], [8.75, 1.15]])
 goal_pointlg = np.array(
-    [[5, 7], [-7, -6.25], [-4.7, 6.5], [6.75, -3.1], [-0.75, -6.25]]
+    [[5, 7], [-7, -6.25], [-4.7, 8.5], [6.75, -3.1], [-0.75, -6.25]]
 )
 
 bots_per_goal_1 = np.ones(len(goal_point_1), dtype=int)
@@ -283,6 +283,17 @@ while not (gui.exit or tui.exit):
     goal_set2.goal_check()
     goal_set3.goal_check()
     goal_set4.goal_check()
+    gui.score_label["text"] = (
+        "Score: "
+        + str((goal_set1.score + goal_set2.score + goal_set3.score + goal_set4.score))
+        + "/"
+        + str(
+            np.sum(bots_per_goal_1)
+            + np.sum(bots_per_goal_sm)
+            + np.sum(bots_per_goal_md)
+            + np.sum(bots_per_goal_lg)
+        )
+    )
 
     if (
         goal_set1.set_complete

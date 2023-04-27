@@ -92,7 +92,9 @@ class GUI:
         button_unselect = Button(self.root, text="Exit", command=self.end_gui).place(
             x=900 + x_offset, y=30
         )
-        self.score_label = Label(self.root).place(x= 800, y= 100)
+        self.score_label = Label(self.root, text="Score: ", font=("Arial", 30))
+        self.score_label.place(x=1300, y=600)
+        print(self.score_label)
         if enable_buttons:
             # Display Buttons, Sliders
 
