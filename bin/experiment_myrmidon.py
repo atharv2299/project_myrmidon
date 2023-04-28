@@ -349,6 +349,7 @@ while not (gui.exit or tui.exit):
         gui.selected_agents,
     )
     r.step()
+
 if allow_logging:
     logger.info(f"Final score: {total_score}")
 root.destroy()
