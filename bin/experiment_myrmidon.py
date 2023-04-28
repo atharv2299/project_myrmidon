@@ -274,9 +274,11 @@ while not (gui.exit or tui.exit):
     goal_set2.goal_check()
     goal_set3.goal_check()
     goal_set4.goal_check()
+    total_score = goal_set1.score + goal_set2.score + goal_set3.score + goal_set4.score
+
     gui.score_label["text"] = (
         "Score: "
-        + str((goal_set1.score + goal_set2.score + goal_set3.score + goal_set4.score))
+        + str((total_score))
         + "/"
         + str(
             np.sum(bots_per_goal_1)
@@ -347,6 +349,8 @@ while not (gui.exit or tui.exit):
         gui.selected_agents,
     )
     r.step()
+if allow_logging:
+    logger.info(f"Final score: {total_score}")
 root.destroy()
 root.mainloop()
 r.call_at_scripts_end()
