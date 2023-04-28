@@ -94,7 +94,6 @@ class GUI:
         )
         self.score_label = Label(self.root, text="Score: ", font=("Arial", 30))
         self.score_label.place(x=1300, y=600)
-        print(self.score_label)
         if enable_buttons:
             # Display Buttons, Sliders
 

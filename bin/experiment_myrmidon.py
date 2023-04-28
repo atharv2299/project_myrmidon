@@ -1,7 +1,7 @@
 import logging
 import time
 from tkinter import Tk
-
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import rps.robotarium as robotarium
@@ -51,18 +51,40 @@ plt.rcParams["keymap.save"].remove("s")
 _N = 20
 allow_logging = args.allow_logging
 if allow_logging:
+    try:
+        os.mkdir(
+            f"./{utils.constants.LOG_LOCATION}{filename}/",
+        )
+    except OSError as error:
+        pass
+
     logger = setup_logger(
         "goal_check",
-        utils.constants.LOG_LOCATION + "-myrmidon-" + filename + "_user-activity.log",
+        utils.constants.LOG_LOCATION
+        + f"{filename}/"
+        + utils.constants.LOG_NAME
+        + "-myrmidon-"
+        + filename
+        + "_user-activity.log",
     )
     mouse_logger = setup_logger(
         "mouse_logger",
-        utils.constants.LOG_LOCATION + "-myrmidon-" + filename + "_user-activity.log",
+        utils.constants.LOG_LOCATION
+        + f"{filename}/"
+        + utils.constants.LOG_NAME
+        + "-myrmidon-"
+        + filename
+        + "_user-activity.log",
     )
     positionFormat = logging.Formatter("%(asctime)s: %(message)s")
     robot_position_logger = setup_logger(
         "robots",
-        utils.constants.LOG_LOCATION + "-myrmidon-" + filename + "_robot_poses.log",
+        utils.constants.LOG_LOCATION
+        + f"{filename}/"
+        + utils.constants.LOG_NAME
+        + "-myrmidon-"
+        + filename
+        + "_robot_poses.log",
         formatter=positionFormat,
     )
 else:
